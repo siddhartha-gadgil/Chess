@@ -70,7 +70,7 @@ give different values for such positions.
 
 ## Difficulty, barriers and readiness
 
-`IsDead` is be defined semantically (no sequence of legal moves leads to a
+`IsDead` is defined semantically (no sequence of legal moves leads to a
 checkmate by either side) and proved for special material in `N-07`; it should not be replaced by a
 material-count heuristic, which is only a sufficient condition.
 

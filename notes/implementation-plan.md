@@ -90,9 +90,9 @@ The canonical first command is `start`. Record the audit before new theory build
 | Audited commit | Working tree on top of `e644cf8` (uncommitted), 2026-11-20. Earlier: `e644cf8` startup audit (template only, clean) |
 | Scope | All new code: `Kernel/Chess/Game.lean`, `Sanity/Chess/Game.lean` (second pass), `Kernel/Chess/Rules.lean`, `Sanity/Chess/Rules.lean`, `Theory/Games/Determinacy.lean`; template code unchanged since the startup audit |
 | Kernel coverage | Complete for `LeanTheory.Chess`: every declaration in `Kernel/Chess/Rules.lean` reviewed against FIDE Arts 2–3, 5.1–5.2 (`N-01`). Template kernel `Kernel/Example.lean` unchanged, clean |
-| Commands run | `lake build` — success, 3 247 jobs, **zero warnings** (after fixing one long line); `lake env lean scripts/check_axioms.lean` — passed for 6 608 declarations (6 726 after `N-03`); grep for `decide`/`sorry`/`axiom` in new files — none in code; negative controls (`perft 1 = 21`, illegal `e1–e3`) rejected by the kernel |
+| Commands run | `lake build` — success, 3 247 jobs, **zero warnings** (after fixing one long line); `lake env lean scripts/check_axioms.lean` — passed for 6 608 declarations (6 761 after `N-03` and special-move fixtures); grep for `decide`/`sorry`/`axiom` in new files — none in code; negative controls (`perft 1 = 21`, illegal `e1–e3`) rejected by the kernel |
 | Open findings | `A-1` (medium) **resolved** by `wellFormed` (`Kernel/Chess/Game`); outcome theorems must assume it. `A-2` (low) **resolved**: `samePosition` compares legal moves (`samePosition_ignores_dead_ep`, `samePosition_live_ep`). `A-3` (low): en passant generation trusts `epTarget` consistency. Determinacy file: no findings |
-| Missing sanity checks | Queenside and Black castling; Black promotion and promotion by capture; perft from a special-move-rich position with sourced counts; recorded-game replay (`N-09`) |
+| Missing sanity checks | Recorded-game replay (`N-09`). Special-move gaps closed by `Sanity/Chess/SpecialMoves.lean` (23 theorems incl. Kiwipete perft 48 / 2039) |
 
 Previous code is in scope. A full startup audit inventories and red-teams every kernel declaration,
 then traces findings into dependent results. After a kernel or foundational change, update the
@@ -107,7 +107,7 @@ Sources (`S-*`):
 | --- | --- | --- | --- |
 | `S-1` | FIDE *Laws of Chess*, approved 2022-08-07, in force 2023-01-01 | Rule definition (normative) | https://handbook.fide.com/chapter/E012023, Arts 1–5, 9.2.3, 9.3, 9.6 (accessed 2026-11-20) |
 | `S-2` | Kasparov's games "from the internet" (user) | Empirical game records | **No collection or locator given** (`Q-7`); valid only as rule-fidelity fixtures |
-| `S-3` | Perft counts from the initial position (20, 400, 8 902, 197 281) | Computational, widely reproduced | Precise source locator still to be recorded |
+| `S-3` | Perft counts: initial position 20, 400, 8 902, 197 281; Kiwipete 48, 2 039, 97 862 | Computational, widely reproduced | https://www.chessprogramming.org/Perft_Results (fetched 2026-11-20) |
 | `S-4` | E. Zermelo (1913), determinacy of chess-like games | Published theorem | Bibliographic details to be recorded |
 | `S-5` | J. Tromp, number of legal chess positions ≈ 4.8 × 10^44; combined estimate (4.822 ± 0.028) × 10^44 | Numerical estimate (sampling) | https://tromp.github.io/chess/chess.html ; talkchess thread |
 | `S-6` | Endgame tablebases (Wikipedia "Endgame tablebase"; chessprogramming.org "Endgame Tablebases"); KQK max DTM 10 commonly cited | Computational observation | KQK depth not confirmed from a primary source |
@@ -164,7 +164,7 @@ Current priority order:
    square, then symmetry or full table.
 2. `N-07` dead positions (in parallel; independent files).
 3. `N-04` chess instance (`G-3(a)`): game-length bound under model A.
-4. Special-move fixtures for `N-02` (in progress, sub-agent).
+4. `N-09` recorded-game replay (needs a game source, `Q-7`).
 
 ## 8. Running a work unit
 

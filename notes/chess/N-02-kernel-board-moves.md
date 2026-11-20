@@ -90,9 +90,13 @@ Scope notes (audit):
 - `A-3` (low): an en passant move is generated whenever `epTarget` matches, without checking that
   an opponent pawn stands behind it. This is correct on positions reached by `play`, but not on
   hand-built positions with an inconsistent `epTarget`; well-formedness should include it.
-- Missing risk-specific checks: queenside castling, Black castling, Black promotion and
-  promotion by capture, perft from a position rich in special moves (e.g. the widely used
-  "Kiwipete" test position; needs a source locator), recorded-game replay (`N-09`).
+- Added (`LeanTheory/Sanity/Chess/SpecialMoves.lean`, 23 theorems, sub-agent, all passing with
+  no kernel discrepancy): White and Black queenside/kingside castling incl. the classic `b1`
+  attacked-but-empty case, castling right lost on rook capture, Black promotion and promotion by
+  capture, Black en passant, double check (only king moves), kings not adjacent, no capture of a
+  defended piece, and Kiwipete perft(1) = 48, perft(2) = 2039 (source:
+  https://www.chessprogramming.org/Perft_Results, Position 2).
+- Still missing: recorded-game replay (`N-09`).
 
 ## Difficulty, barriers and readiness
 

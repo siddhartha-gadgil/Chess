@@ -54,6 +54,7 @@ public import LeanTheory.Kernel.Example
 public import LeanTheory.ResponseExt
 public import LeanTheory.Sanity.Chess.Game
 public import LeanTheory.Sanity.Chess.Rules
+public import LeanTheory.Sanity.Chess.SpecialMoves
 public import LeanTheory.Sanity.Example
 public import LeanTheory.Sanity.QuasisymmetryNotSymmetry
 public import LeanTheory.SubsetSum
