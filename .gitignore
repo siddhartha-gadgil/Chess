@@ -3,3 +3,7 @@
 __pycache__/
 *.pyc
 .venv-ws/
+
+# Regenerable KQK tables (scripts in the same folder, ~15 s)
+notes/reasoning/*/computations/kqk_wtm.tsv
+notes/reasoning/*/computations/kqk_btm.tsv

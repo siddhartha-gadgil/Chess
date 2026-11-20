@@ -1,0 +1,4 @@
+full WTM states 144508 black replies to certified moves 425502
+canonical WTM states 18081 black replies 53384 king moves in cert 9413
+distinct wk in canonical reps ['a1', 'b1', 'b2', 'c1', 'c2', 'c3', 'd1', 'd2', 'd3', 'd4']
+10: WKa1-b1 BK-e6 9: WKb1-c2 BK-f5 8: WKc2-d3 BK-e6 7: WKd3-e4 BK-d6 6: WQb2-c2 BK-e6 5: WQc2-c6 BK-f7 4: WKe4-f5 BK-g7 3: WQc6-d7 BK-h8 2: WKf5-g6 BK-g8 1: WQd7-g7 mate

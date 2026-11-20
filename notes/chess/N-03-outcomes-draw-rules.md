@@ -12,12 +12,12 @@
 | Dependency requirement | `N-02` compiled (`legalMoves`, `inCheck`, `play`); `Q-1` decided |
 | Produces | `IsCheckmate`, `IsStalemate`, `IsDead`, `Outcome` (`whiteWins / draw / blackWins`), a game-state type with history and terminal predicate; contract predicates `ForcesWin`, `ForcesAtLeastDraw` |
 | Difficulty | moderate: the rule model (`Q-1`) changes the game; dead position is a reachability predicate |
-| Status | stated |
-| Implementation status | not started |
-| Implementation evidence | none |
-| Lean evidence | none |
-| Audit evidence | not audited |
-| Last updated | 2026-11-20: created at seeding |
+| Status | verified (definitions + sanity suite; chess `Game` instance pending) |
+| Implementation status | first version complete |
+| Implementation evidence | `LeanTheory/Kernel/Chess/Game.lean`, `LeanTheory/Sanity/Chess/Game.lean` |
+| Lean evidence | Kernel: `LeanTheory.Chess.{wellFormed, epConsistent, samePosition, GameState, GameState.play, GameState.playLegal, GameState.repetitions, GameState.automaticDraw, IsDead, GameState.IsDraw, GameState.IsTerminal, ForcesMate, attackB, forcesMateB, forcesMateB_sound, ForcesMate.not_zero, ForcesMate.mono, ForcesMate.exists_checkmate, ForcesMate.not_isDead}`. Sanity: `LeanTheory.Sanity.Chess.{wellFormed_initial, not_wellFormed_noKing, not_wellFormed_check, not_wellFormed_pawn, not_wellFormed_ep, wellFormed_after_e4, knightDance_same, samePosition_ignores_dead_ep, samePosition_live_ep, fourfold_not_draw, fivefold_draw, seventyFive_draw, seventyFive_boundary, seventyFive_mate_precedence, mateInOne_check, mateInOne, mateInOne_not_zero, mateInOne_not_dead, stalemateTrap, noMateInOne}` |
+| Audit evidence | 2026-11-20, implementation plan §4 (resolves `A-1`, `A-2`) |
+| Last updated | 2026-11-20: kernel and sanity compiled, warning-free, axiom audit passed |
 
 ## Purpose and scope
 
@@ -54,11 +54,23 @@ give different values for such positions.
 
 ## Claims and evidence
 
-None yet.
+- Compiled: `forcesMateB_sound` (the computable checker is sound for `ForcesMate`);
+  `ForcesMate.not_isDead` (the dead-position rule never interrupts a forced mate);
+  `ForcesMate.mono`, `ForcesMate.not_zero`.
+- Compiled fixtures: well-formedness accept/reject; repetition with live and dead en passant;
+  four- vs fivefold; 75-move boundary (149 vs 150) and checkmate precedence; mate in one,
+  stalemate trap (user idea `U-2`), and a no-mate-in-one counterexample.
+- Modelling choices (correction `C-5`): repetition compares castling-right flags and the legal
+  moves of the side to move. FIDE 9.2.3 speaks of the possible moves of both players; for the
+  side not to move only castling rights matter in practice, which the flags capture. The
+  difference arises only for a held right whose castling is temporarily impossible, a case
+  where FIDE arbiters also treat positions as different. `ForcesMate` counts moves of `c` and is
+  defined on positions without history; transferring it to game states (75-move, fivefold) needs
+  the lemma planned for `N-05`.
 
 ## Difficulty, barriers and readiness
 
-Blocked on `N-02`. `IsDead` should be defined semantically (no sequence of legal moves leads to a
+`IsDead` is be defined semantically (no sequence of legal moves leads to a
 checkmate by either side) and proved for special material in `N-07`; it should not be replaced by a
 material-count heuristic, which is only a sufficient condition.
 

@@ -1,0 +1,83 @@
+{
+ "wtm_states": 144508,
+ "btm_states": 223944,
+ "total_states": 368452,
+ "wtm_canonical": 18081,
+ "btm_canonical": 28056,
+ "wtm_won": 144508,
+ "wtm_not_won": 0,
+ "max_dtm_wtm": 10,
+ "dtm_distribution_wtm": {
+  "1": 2448,
+  "2": 5012,
+  "3": 9064,
+  "4": 19964,
+  "5": 26164,
+  "6": 32064,
+  "7": 32104,
+  "8": 15000,
+  "9": 2680,
+  "10": 8
+ },
+ "dtm_distribution_wtm_canonical": {
+  "1": 306,
+  "2": 629,
+  "3": 1135,
+  "4": 2499,
+  "5": 3273,
+  "6": 4010,
+  "7": 4016,
+  "8": 1877,
+  "9": 335,
+  "10": 1
+ },
+ "btm_classes": {
+  "C": 22176,
+  "S": 872,
+  "M0": 364,
+  "mate-in-n": 200532
+ },
+ "btm_classes_canonical": {
+  "mate-in-n": 25114,
+  "C": 2787,
+  "M0": 46,
+  "S": 109
+ },
+ "btm_mate_in_n_distribution": {
+  "1": 1352,
+  "2": 2956,
+  "3": 7480,
+  "4": 14144,
+  "5": 25484,
+  "6": 39908,
+  "7": 54052,
+  "8": 43800,
+  "9": 11300,
+  "10": 56
+ },
+ "btm_mate_in_n_distribution_canonical": {
+  "1": 169,
+  "2": 372,
+  "3": 936,
+  "4": 1773,
+  "5": 3190,
+  "6": 4997,
+  "7": 6769,
+  "8": 5483,
+  "9": 1417,
+  "10": 8
+ },
+ "max_btm_mate_in": 10,
+ "certificate_black_replies_total_canonical": 53384,
+ "certificate_max_black_replies": 8,
+ "wtm_white_moves_total": 3992456,
+ "btm_black_moves_total": 899216,
+ "max_dtm_examples_canonical": [
+  [
+   "a1",
+   "b2",
+   "f5"
+  ]
+ ],
+ "max_dtm_examples_count_canonical": 1
+}
