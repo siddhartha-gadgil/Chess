@@ -13,5 +13,6 @@ instructions.
   feeds a checked kernel / sanity / theory / bridge / certificate library.
 - [`formalization/`](formalization/README.md): model contracts, the meaning of a design proof.
 - [`goals/`](goals/README.md): generic guidance on choosing and stating goals.
+- [`chess/`](chess/README.md): the chess research notes `N-01`…`N-09`.
 - [`reasoning/`](reasoning/README.md): one folder per proof attempt or exploration run by the
   `try-to-prove` and `explore-mathematics` skills.

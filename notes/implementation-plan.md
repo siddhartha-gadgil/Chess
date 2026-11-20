@@ -6,8 +6,19 @@ stable identifiers when titles or priorities change; detailed work belongs in no
 
 ## 0. Current status
 
-‹Summarize the domain, verified foundation, active research, main barriers and the most useful
-ready choices. Separate compiled facts from conjectures, sources and observations.›
+Repository `Chess`: a theory of chess, with the rules encoded from the FIDE Laws of Chess (2023).
+Seeded 2026-11-20 with goals `G-1`–`G-4`, questions `Q-1`–`Q-9` and notes `N-01`–`N-09`
+(`notes/chess/`). The library builds warning-free and passes the axiom audit (§4).
+
+- Verified: the rules kernel `LeanTheory.Chess` with its fixtures (perft 20/400/8 902 and special
+  moves; `N-02`), and abstract Zermelo determinacy `LeanTheory.Games` (`N-04`).
+- Sourced: FIDE rules (`S-1`); Zermelo determinacy (`S-4`).
+- Computational observations, not proofs here: KQK is a forced win, commonly cited maximum
+  depth 10 (`S-6`); ≈ 4.8 × 10^44 legal positions (`S-5`).
+- Open: the value of chess under perfect play (`Q-5`). This project can prove that a value exists
+  (`N-04`) and certify small endgames; settling the value is not expected (`N-08`).
+- Rule model decided: `Q-1` = A (FIDE automatic draws). Defaults adopted for `Q-2`, `Q-3`
+  (proposals in `N-02`, `N-05`); revisit if they cause trouble.
 
 ## 1. Goal registry
 
@@ -15,7 +26,11 @@ Several goals may coexist. Goals may be independent or support other goals.
 
 | ID | Goal and success criterion | Supports / supported by | Status | Evidence needed |
 | --- | --- | --- | --- | --- |
-| `G-...` | ‹precise mathematical, scientific or engineering outcome› | ‹IDs› | ‹open / active / achieved / blocked / superseded› | ‹contracts and declarations› |
+| `G-1` | **Faithful rules kernel.** Computable Lean definitions of positions, legal moves (FIDE Arts 2–3) and outcomes (Arts 1, 5, 9.6), with a sanity suite: perft(1..3) from the start = 20 / 400 / 8 902, castling, en passant, promotion, pin, checkmate and stalemate fixtures, replay of recorded games | supports `G-2`, `G-3`, `G-4` | open | compiled `N-02`, `N-03`, `N-09` with sanity theorems; audit |
+| `G-2` | **KQK is a win.** Compiled theorem: from every well-formed state with only WK, WQ, BK and White to move, White forces checkmate within `N` moves (target `N = 10`) against every defence; plus a precise Black-to-move case split | supported by `G-1`; supports `G-4` | open | `kqk_forcesMate` (planned, `N-05`) |
+| `G-3` | **Perfect play.** (a) Compiled determinacy: under the chosen rule model every state has a value in {White wins, draw, Black wins} with optimal strategies. (b) Determine the value of the initial position | supported by `G-1`, `G-4` | (a) open, (b) open research problem, not expected to be achieved | (a) `N-04`; (b) no feasible route known (`N-08`) |
+| `G-4` | **Further endgame theory.** Dead-position results (KvK, KBvK, KNvK) and further certified endgames (KRK, KBBK, KBNK, KPK) using the `G-2` method | supported by `G-1`, `G-2`; supports `G-3` | open | `N-07`; later notes |
+
 
 ## 2. Question registry
 
@@ -23,13 +38,44 @@ Questions may be primary research outputs or auxiliary prerequisites.
 
 | ID | Question | Needed by | Status | Current best answer / barrier |
 | --- | --- | --- | --- | --- |
-| `Q-...` | ‹precise question› | ‹`G-*`, `Q-*`, `N-*`› | ‹open / active / answered / blocked / refuted› | ‹summary and evidence level› |
+| `Q-1` | Which rule model defines "perfect play": (A) FIDE automatic draws 9.6 only, (B) A plus claimable 9.2/9.3 draws, (C) idealised repetition-draw without move-count rule? | `G-3`, `N-03`, `N-04` | answered 2026-11-20 | **Model A (FIDE automatic: checkmate, stalemate, dead position, 9.6.1 fivefold, 9.6.2 75-move)**, chosen by the user |
+| `Q-2` | What is a position in the kernel: placement, side to move, castling rights, en passant target, halfmove clock; how is repetition (9.2.3: same legal moves) represented? | `N-02`, `N-03` | answered (default adopted 2026-11-20) | Placement, side to move, castling rights, en passant target, halfmove clock; history outside the position |
+| `Q-3` | Do theorems quantify over well-formed states or over FIDE-reachable positions (3.10.3)? | `G-2`, `G-4`, `N-05` | answered (default adopted 2026-11-20) | Well-formed states (stronger, avoids reachability) |
+| `Q-4` | Exact KQK maximum depth to mate (White to move) and the Black-to-move case split | `G-2`, `N-05` | open | Commonly cited 10; `N-06` will compute (observation level) |
+| `Q-5` | Value of chess under perfect play | `G-3` | open research problem | Unknown; see `N-08` |
+| `Q-5a` | Is the game determined under the chosen rule model? | `G-3`, `Q-5` | open (answer known in literature) | Yes, by Zermelo (`S-4`); to formalise in `N-04` |
+| `Q-6` | How to define and decide dead positions (5.2.2) | `N-03`, `N-07` | open | Semantic definition; decide only for special material |
+| `Q-7` | Which collection of Kasparov games (URL, locators, terms of use) serves as fixtures? | `N-09` | open (user input) | none |
+| `Q-8` | KQK proof route: human strategy, kernel-checked retrograde certificate, or hybrid with symmetry? | `N-05` | open | Recommended: certificate + symmetry |
+| `Q-9` | Which partial results toward `Q-5` are feasible and worthwhile? | `G-3` | open | Determinacy, certified endgames (`N-08`) |
+
 
 ## 3. Note registry and dependency graph
 
 | ID | Note | Addresses | Depends on | Difficulty | Status / Lean readiness | Next action |
 | --- | --- | --- | --- | --- | --- | --- |
-| `N-...` | ‹path and title› | ‹`G-*`, `Q-*`› | ‹notes and declarations› | ‹routine / moderate / hard / research› | ‹exploratory / stated / proof-ready / lean-ready / verified / blocked / refuted / superseded› | ‹one work unit› |
+| `N-01` | `chess/N-01-fide-rules-synthesis.md` — FIDE rules synthesis | `G-1`, `Q-1`–`Q-3`, `Q-6` | `S-1` | routine | stated / not Lean | Confirm decisions `Q-1`–`Q-3` |
+| `N-02` | `chess/N-02-kernel-board-moves.md` — kernel: board, moves | `G-1`, `Q-2` | `N-01` (stated) | moderate | **verified** (fixtures; findings `A-1`–`A-3`) | Add missing special-move fixtures; well-formedness in `N-03` |
+| `N-03` | `chess/N-03-outcomes-draw-rules.md` — outcomes, draw rules, `ForcesMate`, well-formedness | `G-1`, `G-3`, `Q-1`, `Q-6` | `N-02` (compiled ✓), `Q-1` (✓ model A) | moderate | stated / **lean-ready** | Define game states with history, draw rules, `WellFormed`, `ForcesMate` |
+| `N-04` | `chess/N-04-determinacy.md` — Zermelo determinacy | `G-3`, `Q-5a` | abstract: none; chess: `N-03` (compiled) | routine–moderate | abstract **verified**; chess instance blocked on `N-03` | Instantiate after `N-03` |
+| `N-05` | `chess/N-05-kqk-strategy.md` — KQK forced mate | `G-2`, `Q-4`, `Q-8` | `N-02`, `N-03` (compiled); `N-06` (data only) | moderate–hard | stated / blocked | After kernel |
+| `N-06` | `chess/N-06-kqk-retrograde-oracle.md` — KQK oracle | `Q-4`, `Q-8` | `N-01` | routine | exploratory / no Lean | Python retrograde analysis |
+| `N-07` | `chess/N-07-dead-positions.md` — dead positions | `G-1`, `G-4`, `Q-6` | `N-02`, `N-03` (compiled) | moderate | stated / blocked | After kernel |
+| `N-08` | `chess/N-08-value-of-chess.md` — value of chess: status | `G-3`, `Q-5`, `Q-9` | `N-04` | research | exploratory / not Lean | Keep as guard against overclaiming |
+| `N-09` | `chess/N-09-game-fixtures.md` — recorded games as fixtures | `G-1`, `Q-7` | `N-02` (compiled), `Q-7` | routine–moderate | stated / blocked | Choose source |
+
+Dependency graph (→ = "is needed by"; nothing is established yet):
+
+```text
+S-1 → N-01 → N-02 → N-03 → N-05 → G-2 → G-4
+                 │      ├→ N-07 → G-4
+                 │      └→ N-04(chess) → G-3(a) ┄┄> G-3(b) [open, N-08]
+                 └→ N-09 (needs Q-7)
+N-04(abstract) → N-04(chess)          N-01 → N-06 ┄data┄> N-05
+```
+
+Ready now: `N-03` (kernel compiled), `N-06`; `N-01` complete except claim-rule wording (not needed
+under model A).
 
 A dependency is established only when its required output is a compiled Lean declaration. A note
 may explore a conditional dependency, but the edge and all downstream status must remain marked
@@ -41,12 +87,12 @@ The canonical first command is `start`. Record the audit before new theory build
 
 | Audit | Value |
 | --- | --- |
-| Audited commit | ‹commit hash or `not yet audited`› |
-| Scope | ‹full startup / changes since commit / affected modules› |
-| Kernel coverage | ‹every declaration reviewed, or exact gaps› |
-| Commands run | ‹builds, axiom audit and other checks with outcomes› |
-| Open findings | ‹severity, affected declarations/notes and owner› |
-| Missing sanity checks | ‹triad or risk-specific adversarial checks still required› |
+| Audited commit | Working tree on top of `e644cf8` (uncommitted), 2026-11-20. Earlier: `e644cf8` startup audit (template only, clean) |
+| Scope | All new code: `Kernel/Chess/Rules.lean`, `Sanity/Chess/Rules.lean`, `Theory/Games/Determinacy.lean`; template code unchanged since the startup audit |
+| Kernel coverage | Complete for `LeanTheory.Chess`: every declaration in `Kernel/Chess/Rules.lean` reviewed against FIDE Arts 2–3, 5.1–5.2 (`N-01`). Template kernel `Kernel/Example.lean` unchanged, clean |
+| Commands run | `lake build` — success, 3 247 jobs, **zero warnings** (after fixing one long line); `lake env lean scripts/check_axioms.lean` — passed for 6 608 declarations; grep for `decide`/`sorry`/`axiom` in new files — none in code; negative controls (`perft 1 = 21`, illegal `e1–e3`) rejected by the kernel |
+| Open findings | `A-1` (medium): rules functions are total on ill-formed positions (`inCheck` false with no king) — any theorem about outcomes must assume `WellFormed` (to be defined in `N-03`); blocks `G-2` statements without it. `A-2` (low): `epTarget` field is FEN-style; repetition must compare legal-move sets (FIDE 9.2.3). `A-3` (low): en passant generation trusts `epTarget` consistency. Determinacy file: no findings |
+| Missing sanity checks | Queenside and Black castling; Black promotion and promotion by capture; perft from a special-move-rich position with sourced counts; recorded-game replay (`N-09`) |
 
 Previous code is in scope. A full startup audit inventories and red-teams every kernel declaration,
 then traces findings into dependent results. After a kernel or foundational change, update the
@@ -55,14 +101,48 @@ items from verified status.
 
 ## 5. Corrections and assumption ledger
 
-‹List false or underspecified starting claims with precise replacements. Record every model law,
-empirical input, parameter range, unit convention and validity envelope, together with its source.›
+Sources (`S-*`):
+
+| ID | Source | Kind | Locator / validity |
+| --- | --- | --- | --- |
+| `S-1` | FIDE *Laws of Chess*, approved 2022-08-07, in force 2023-01-01 | Rule definition (normative) | https://handbook.fide.com/chapter/E012023, Arts 1–5, 9.2.3, 9.3, 9.6 (accessed 2026-11-20) |
+| `S-2` | Kasparov's games "from the internet" (user) | Empirical game records | **No collection or locator given** (`Q-7`); valid only as rule-fidelity fixtures |
+| `S-3` | Perft counts from the initial position (20, 400, 8 902, 197 281) | Computational, widely reproduced | Precise source locator still to be recorded |
+| `S-4` | E. Zermelo (1913), determinacy of chess-like games | Published theorem | Bibliographic details to be recorded |
+| `S-5` | J. Tromp, number of legal chess positions ≈ 4.8 × 10^44; combined estimate (4.822 ± 0.028) × 10^44 | Numerical estimate (sampling) | https://tromp.github.io/chess/chess.html ; talkchess thread |
+| `S-6` | Endgame tablebases (Wikipedia "Endgame tablebase"; chessprogramming.org "Endgame Tablebases"); KQK max DTM 10 commonly cited | Computational observation | KQK depth not confirmed from a primary source |
+
+User ideas: `U-1` "trap kings against the edge" (box-shrinking KQK strategy, `N-05` route a);
+`U-2` "guard against stalemates" (stalemate-avoidance lemma, `N-05`).
+
+Model assumptions: the game is defined by `S-1` Arts 1–5 and the rule model of `Q-1` (pending;
+proposed A). The rules are definitions, encoded as computable Lean functions, not as laws; their
+fidelity to `S-1` is tested by sanity fixtures, never assumed.
+
+Corrections:
+
+- `C-1`: "Perfect play results in a draw" is a conjecture/belief, not a known result. Known:
+  the value exists (Zermelo). Replace with `G-3(a)` determinacy plus open `G-3(b)`.
+- `C-2`: "Insufficient material" is sufficient, not necessary, for a dead position (5.2.2).
+- `C-3`: "KQ v K is a win" is false as stated for Black to move when Black can capture an
+  undefended queen or is stalemated. Precise form in `G-2`/`N-05`.
+- `C-4`: Recorded master games, including Kasparov's, do not bear on the perfect-play value.
 
 ## 6. Theory tracks and model ladder
 
-‹Group related notes into theory tracks. For each track give the current verified frontier,
-questions, proof or certificate techniques, and first useful deliverable. List model rungs from
-simple to realistic and the verified reduction or explicit error envelope needed between rungs.›
+Tracks:
+
+1. **Rules** (`N-01`, `N-02`, `N-03`, `N-09`): frontier empty. First deliverable: computable
+   `legalMoves` with perft(1..3) sanity.
+2. **Game theory** (`N-04`, `N-08`): frontier empty. First deliverable: abstract finite-game
+   determinacy.
+3. **Endgames** (`N-05`, `N-06`, `N-07`): frontier empty. First deliverable: KQK oracle data,
+   then a kernel-checked KQK certificate.
+
+Model ladder: (i) rules without draw-by-repetition/move-count (enough for short forced mates);
+(ii) model A, FIDE automatic draws; (iii) model B with claims. A forced mate within `n` moves
+proved at rung (i) from a fresh history transfers to (ii) and (iii) when `n` is below the
+draw thresholds (to be proved as a lemma, not assumed).
 
 ## 7. Work selection
 
@@ -78,8 +158,12 @@ missing authorization or absence of useful ready work.
 
 Current priority order:
 
-1. ‹ready item and reason›
-2. ‹ready item and reason›
+1. `N-03` game states, draw rules (model A), `WellFormed` (resolves `A-1`), `ForcesMate`:
+   unblocks `N-04` (chess), `N-05`, `N-07`.
+2. `N-06` KQK oracle: cheap; tests the "depth 10" claim and sizes the `N-05` certificate; can run
+   in parallel with `N-03`.
+3. Missing special-move fixtures for `N-02` (small, closes audit gaps).
+4. Then `N-05` (`G-2`), `N-07`, `N-04` chess instance (`G-3(a)`).
 
 ## 8. Running a work unit
 
@@ -108,15 +192,26 @@ the physical model.
 
 ## 10. Evidence gates
 
-‹For each goal or design, list which contracts must hold for the same witness and which evidence
-is required: compiled proof, exact certificate, empirical data or external model validation.›
+- `G-1`: compiled kernel + sanity theorems (perft, special-move fixtures, recorded-game replay);
+  the fidelity evidence is the agreement with `S-1` and `S-3`, an external check.
+- `G-2`: compiled `ForcesMate` theorem over the same kernel used by `G-1`'s sanity suite;
+  any certificate data is untrusted until the checker soundness theorem compiles.
+- `G-3(a)`: compiled determinacy for the same rule model as `Q-1`.
 
 ## 11. Progress log
 
-‹One dated entry per work unit: selected item, theory or note changes, declarations proved, failed
-approaches and barriers, checks run, status changes, new dependencies and next ready choices.›
+- 2026-11-20 — `start`: full startup audit of template commit `e644cf8` (§4).
+- 2026-11-20 — Seeding: created `G-1`–`G-4`, `Q-1`–`Q-9`, `N-01`–`N-09`, sources `S-1`–`S-6`,
+  corrections `C-1`–`C-4`. FIDE rule text checked against `S-1`. No Lean written.
+- 2026-11-20 — `Q-1` answered (model A, user). `Q-2`, `Q-3` defaults adopted. Work unit
+  `N-02` + `N-04` (parallel, sub-agent for `N-04`): rules kernel `Kernel/Chess/Rules.lean` with
+  17 sanity theorems (perft 1–3 by kernel evaluation, ≈ 3 min for the sanity file); abstract
+  determinacy `Theory/Games/Determinacy.lean`. Audit findings `A-1`–`A-3`. Next ready: `N-03`,
+  `N-06`.
 
 ## 12. Implementation and workstation log
 
-‹Technical notes: certificate formats, build time and memory, refactors and workstation runs. Keep
-these distinct from mathematical evidence. See `workstation/REVIEWED.md`.›
+Template build: 3 244 jobs, ≈ 1m23s. After chess work: 3 247 jobs. `Sanity/Chess/Rules.lean`
+takes ≈ 3 min alone, dominated by `perft_three` (kernel evaluation of ≈ 9 000 leaves with a
+function-valued board). Faster move generation will matter for KQK certificates (`N-05`).
+Keep these distinct from mathematical evidence. See `workstation/REVIEWED.md`.

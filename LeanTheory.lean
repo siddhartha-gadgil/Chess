@@ -48,8 +48,10 @@ public import LeanTheory.Certificates.ValidatedTrig
 public import LeanTheory.Certificates.ValidatedTrigFast
 public import LeanTheory.Certificates.WeightedEll1
 public import LeanTheory.Elaborate
+public import LeanTheory.Kernel.Chess.Rules
 public import LeanTheory.Kernel.Example
 public import LeanTheory.ResponseExt
+public import LeanTheory.Sanity.Chess.Rules
 public import LeanTheory.Sanity.Example
 public import LeanTheory.Sanity.QuasisymmetryNotSymmetry
 public import LeanTheory.SubsetSum
@@ -58,6 +60,7 @@ public import LeanTheory.Theory.Fields.FieldLineExistence
 public import LeanTheory.Theory.Fields.InvariantBarrier
 public import LeanTheory.Theory.Fields.LieGradient
 public import LeanTheory.Theory.Fields.VectorCalculus
+public import LeanTheory.Theory.Games.Determinacy
 public import LeanTheory.Theory.KAM.AnalyticComposition
 public import LeanTheory.Theory.KAM.AnalyticCompositionLip
 public import LeanTheory.Theory.KAM.CauchyTwoVar
