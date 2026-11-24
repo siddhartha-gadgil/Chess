@@ -12,7 +12,8 @@ Seeded 2026-11-20 with goals `G-1`–`G-4`, questions `Q-1`–`Q-9` and notes `N
 
 - Verified: **KQK is a forced win for White to move, within 10 moves** (`kqk_forcesMate_wellFormed`,
   `G-2`); chess is a determined finite game (`chess_determined_initial`, `G-3(a)`); KvK and KNvK
-  are dead (`N-07`); game states, FIDE automatic draws, `wellFormed`, `ForcesMate` with a sound checker
+  are dead, and KBvK (`N-07`); in the full game with draw rules KQK from a fresh start is a win
+  (`kqk_game_whiteWins_wellFormed`); game states, FIDE automatic draws, `wellFormed`, `ForcesMate` with a sound checker
   (`N-03`); the rules kernel `LeanTheory.Chess` with its fixtures (perft 20/400/8 902 and special
   moves; `N-02`), and abstract Zermelo determinacy `LeanTheory.Games` (`N-04`).
 - Sourced: FIDE rules (`S-1`); Zermelo determinacy (`S-4`).
@@ -30,7 +31,7 @@ Several goals may coexist. Goals may be independent or support other goals.
 | ID | Goal and success criterion | Supports / supported by | Status | Evidence needed |
 | --- | --- | --- | --- | --- |
 | `G-1` | **Faithful rules kernel.** Computable Lean definitions of positions, legal moves (FIDE Arts 2–3) and outcomes (Arts 1, 5, 9.6), with a sanity suite: perft(1..3) from the start = 20 / 400 / 8 902, castling, en passant, promotion, pin, checkmate and stalemate fixtures, replay of recorded games | supports `G-2`, `G-3`, `G-4` | open | compiled `N-02`, `N-03`, `N-09` with sanity theorems; audit |
-| `G-2` | **KQK is a win.** Compiled theorem: from every well-formed state with only WK, WQ, BK and White to move, White forces checkmate within `N` moves (target `N = 10`) against every defence; plus a precise Black-to-move case split | supported by `G-1`; supports `G-4` | **achieved** for White to move (`kqk_forcesMate_wellFormed`); Black-to-move split open | `kqk_forcesMate`, `kqk_forcesMate_wellFormed` (`N-05`) |
+| `G-2` | **KQK is a win.** Compiled theorem: from every well-formed state with only WK, WQ, BK and White to move, White forces checkmate within `N` moves (target `N = 10`) against every defence; plus a precise Black-to-move case split | supported by `G-1`; supports `G-4` | **achieved** for White to move, also in the full game with draw rules (`kqk_forcesMate_wellFormed`, `kqk_game_whiteWins_wellFormed`); Black-to-move split open | `kqk_forcesMate`, `kqk_forcesMate_wellFormed` (`N-05`) |
 | `G-3` | **Perfect play.** (a) Compiled determinacy: under the chosen rule model every state has a value in {White wins, draw, Black wins} with optimal strategies. (b) Determine the value of the initial position | supported by `G-1`, `G-4` | (a) **achieved** (`chess_determined_initial`), (b) open research problem, not expected to be achieved | (a) `N-04`; (b) no feasible route known (`N-08`) |
 | `G-4` | **Further endgame theory.** Dead-position results (KvK, KBvK, KNvK) and further certified endgames (KRK, KBBK, KBNK, KPK) using the `G-2` method | supported by `G-1`, `G-2`; supports `G-3` | open | `N-07`; later notes |
 
@@ -63,7 +64,7 @@ Questions may be primary research outputs or auxiliary prerequisites.
 | `N-04` | `chess/N-04-determinacy.md` — Zermelo determinacy | `G-3`, `Q-5a` | abstract: none; chess: `N-03` (compiled) | routine–moderate | **verified** (abstract + chess instance) | Done; `G-3(a)` achieved |
 | `N-05` | `chess/N-05-kqk-strategy.md` — KQK forced mate | `G-2`, `Q-4`, `Q-8` | `N-02` ✓, `N-03` ✓ (compiled); `N-06` ✓ (data only) | moderate–hard | **verified** (White to move) | Black-to-move split; transfer to `GameState` |
 | `N-06` | `chess/N-06-kqk-retrograde-oracle.md` — KQK oracle | `Q-4`, `Q-8` | `N-01` | routine | **complete** (observation): all WTM wins, max DTM 10 | Feed certificate to `N-05` |
-| `N-07` | `chess/N-07-dead-positions.md` — dead positions | `G-1`, `G-4`, `Q-6` | `N-02` ✓, `N-03` ✓ | moderate | **verified** KvK, KNvK; KBvK open | KBvK via colour invariant |
+| `N-07` | `chess/N-07-dead-positions.md` — dead positions | `G-1`, `G-4`, `Q-6` | `N-02` ✓, `N-03` ✓ | moderate | **verified** KvK, KNvK, KBvK | Optional: KB v KB same colour, blocked pawns |
 | `N-08` | `chess/N-08-value-of-chess.md` — value of chess: status | `G-3`, `Q-5`, `Q-9` | `N-04` | research | exploratory / not Lean | Keep as guard against overclaiming |
 | `N-09` | `chess/N-09-game-fixtures.md` — recorded games as fixtures | `G-1`, `Q-7` | `N-02` (compiled), `Q-7` | routine–moderate | stated / blocked | Choose source |
 
@@ -162,9 +163,8 @@ missing authorization or absence of useful ready work.
 
 Current priority order:
 
-1. KQK Black-to-move case split and transfer of `ForcesMate` to `GameState` (draw rules), to
-   finish `G-2` in full.
-2. KBvK dead (`N-07`, plan recorded).
+1. KQK Black-to-move case split, to finish `G-2` in full.
+2. Dead-position sanity: the initial position is not dead; KB v KB same-coloured bishops dead.
 3. Next certified endgame (KRK) reusing the KQK pipeline (`G-4`); needs faster kernel move
    generation or symmetry to keep checking time reasonable.
 4. `N-09` recorded-game replay (needs a game source, `Q-7`).
@@ -222,6 +222,9 @@ the physical model.
   checks) all pass; **`kqk_forcesMate_wellFormed` proved** (`G-2`, White to move). Memory
   incident: one kernel declaration grew to 11 GB; fixed by per-row declarations and cgroup caps
   (`A-5`).
+- 2026-11-24 — `kqk_game_whiteWins_wellFormed` (KQK in `chessGame` with all model-A draw rules;
+  rank argument, `KQKGame.lean`). `dead_KBK` (sub-agent, `DeadPositionsBishop.lean`). Build
+  warning-free; axiom audit passed for 11 846 declarations.
 
 ## 12. Implementation and workstation log
 

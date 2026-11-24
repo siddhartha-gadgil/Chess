@@ -86,9 +86,14 @@ Scope and limits:
 
 - White to move only. The Black-to-move case split (mate unless Black can capture an undefended
   queen or is stalemated) is not yet a theorem.
-- `ForcesMate` is about positions: it ignores history-dependent draws. Transfer to `GameState`
-  (75-move and fivefold rules) needs a lemma: at most 19 plies are needed and the depth strictly
-  decreases along the forcing line, so no position repeats within it; open.
+- **Full game with draw rules — proved** (`Certificates/Chess/KQKGame.lean`):
+  `kqk_game_whiteWins_wellFormed`: from the start of a game (`State.start p`) in a well-formed KQK
+  position with White to move, no castling rights and halfmove clock ≤ 130, White forces a win in
+  `chessGame` (FIDE rule model A, incl. fivefold and 75-move rules and dead positions) and
+  `chessGame.value (State.start p) = .whiteWins`. Proof: a rank (twice the table depth, or twice the
+  largest reply depth plus one) strictly decreases along the certified lines, so no position
+  repeats (`KQKNode.rank_eq_of_same`) and the clock stays below 150. The bound 130 is what the
+  argument needs (≤ 20 plies), not a sharp threshold.
 - Castling flags are assumed `none` (they are meaningless without rooks; generalising needs a
   lemma that castling flags without rooks do not affect legal moves).
 - Depth 10 is the bound proved; that it is attained (exactness) is not proved here.

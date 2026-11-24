@@ -13,6 +13,7 @@ public import LeanTheory.Certificates.Chess.KQK
 public import LeanTheory.Certificates.Chess.KQKBridge
 public import LeanTheory.Certificates.Chess.KQKCheck
 public import LeanTheory.Certificates.Chess.KQKData
+public import LeanTheory.Certificates.Chess.KQKGame
 public import LeanTheory.Certificates.ConvAlgebra
 public import LeanTheory.Certificates.DigitSumCert
 public import LeanTheory.Certificates.DiscreteMaxPrinciple
@@ -64,6 +65,7 @@ public import LeanTheory.Sanity.QuasisymmetryNotSymmetry
 public import LeanTheory.SubsetSum
 public import LeanTheory.TaskHandlers
 public import LeanTheory.Theory.Chess.DeadPositions
+public import LeanTheory.Theory.Chess.DeadPositionsBishop
 public import LeanTheory.Theory.Chess.Determinacy
 public import LeanTheory.Theory.Fields.FieldLineExistence
 public import LeanTheory.Theory.Fields.InvariantBarrier
