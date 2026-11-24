@@ -939,20 +939,20 @@ theorem knkPosBlack_dead : IsDead knkPosBlack :=
   dead_KNK _ .black (by kernel_fact) (by kernel_fact) (by kernel_fact)
 
 /-- Black: king h8; White: king g6, queen a7; White to move. -/
-def kqkPos : Position :=
+def kqkFixture : Position :=
   Position.ofList [(sq 7 8, ⟨.black, .king⟩), (sq 6 6, ⟨.white, .king⟩),
     (sq 0 7, ⟨.white, .queen⟩)] .white
 
 /-- Rejected fixture: the `KQK` position is not a kings-only position. -/
-theorem kqkPos_not_onlyKings : onlyKings kqkPos.board = false := by kernel_fact
+theorem kqkPos_not_onlyKings : onlyKings kqkFixture.board = false := by kernel_fact
 
-/-- Rejected fixture: the queen is not a knight, so `dead_KNK` does not apply to `kqkPos`. -/
-theorem kqkPos_not_kingsAndKnight : kingsAnd ⟨.white, .knight⟩ kqkPos.board = false := by
+/-- Rejected fixture: the queen is not a knight, so `dead_KNK` does not apply to `kqkFixture`. -/
+theorem kqkPos_not_kingsAndKnight : kingsAnd ⟨.white, .knight⟩ kqkFixture.board = false := by
   kernel_fact
 
 /-- **A `KQK` position is not dead**: White mates in one (`Qa7–g7#`). Guards against an
 over-broad `IsDead`. -/
-theorem not_dead_KQK_example : ¬ IsDead kqkPos :=
-  (forcesMateB_sound .white 1 kqkPos (by kernel_fact)).not_isDead
+theorem not_dead_KQK_example : ¬ IsDead kqkFixture :=
+  (forcesMateB_sound .white 1 kqkFixture (by kernel_fact)).not_isDead
 
 end LeanTheory.Chess

@@ -10,9 +10,10 @@ public import LeanTheory.Certificates.Chess.KQKData
 /-!
 # From a checked KQK table to forced mates in all KQK positions
 
-Bridge for goal `G-2` (note `N-05`). Given a table `T` all of whose entries pass `stateOK` and the
-coverage check `coverOK` (defined with the data in `KQKData`), every KQK position with White to move and the black king not attacked is
-a forced mate for White within 10 moves (`kqk_forcesMate_of_table`), and so is every well-formed
+Bridge for goal `G-2` (note `N-05`). Given a table `T` all of whose entries pass `stateOK` and
+the coverage check `coverOK` (defined with the data in `KQKData`), every KQK position with White
+to move and the black king not attacked is a forced mate for White within 10 moves
+(`kqk_forcesMate_of_table`), and so is every well-formed
 position with exactly these three pieces, White to move and no castling rights
 (`kqk_forcesMate_of_table_wellFormed`). The table itself is supplied and checked in
 `Certificates/Chess/KQK`.

@@ -9,6 +9,7 @@ public import LeanTheory.Bridge.Example
 public import LeanTheory.Certificates.BlockBounds
 public import LeanTheory.Certificates.BoolCert
 public import LeanTheory.Certificates.Contraction
+public import LeanTheory.Certificates.Chess.KQK
 public import LeanTheory.Certificates.Chess.KQKBridge
 public import LeanTheory.Certificates.Chess.KQKCheck
 public import LeanTheory.Certificates.Chess.KQKData
