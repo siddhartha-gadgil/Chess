@@ -50,6 +50,7 @@ Questions may be primary research outputs or auxiliary prerequisites.
 | `Q-5a` | Is the game determined under the chosen rule model? | `G-3`, `Q-5` | open (answer known in literature) | Yes, by Zermelo (`S-4`); to formalise in `N-04` |
 | `Q-6` | How to define and decide dead positions (5.2.2) | `N-03`, `N-07` | open | Semantic definition; decide only for special material |
 | `Q-7` | Which collection of Kasparov games (URL, locators, terms of use) serves as fixtures? | `N-09` | open (user input) | none |
+| `N-10` | `chess/N-10-krk.md` — KRK forced mate within 16 | `G-4` | `N-05` pipeline ✓ | moderate | stated / certificate check running | Kernel-check 64 chunks; bridge |
 | `Q-8` | KQK proof route: human strategy, kernel-checked retrograde certificate, or hybrid with symmetry? | `N-05` | open | Recommended: certificate + symmetry |
 | `Q-9` | Which partial results toward `Q-5` are feasible and worthwhile? | `G-3` | open | Determinacy, certified endgames (`N-08`) |
 

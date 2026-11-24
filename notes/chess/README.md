@@ -14,3 +14,4 @@ Research notes for the chess project. Registries, the dependency graph and prior
 | `N-07` | [Dead positions](N-07-dead-positions.md) |
 | `N-08` | [Value of chess: status and barriers](N-08-value-of-chess.md) |
 | `N-09` | [Recorded games as fixtures](N-09-game-fixtures.md) |
+| `N-10` | [King and rook versus king](N-10-krk.md) |
