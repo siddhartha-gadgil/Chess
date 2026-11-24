@@ -293,8 +293,12 @@ def coverOK (T : Nat → Nat) (i : Nat) : Bool :=
     attackedBy (kqkBoard (sqOf (i / 4096)) (sqOf (i / 64)) (sqOf i)) .white (sqOf i) ||
     entDepth (T i) != 0
 
+/-- All entries with the white king on `wk` and the queen on `wq` pass `stateOK` and `coverOK`. -/
+def rowOK (wk wq : Nat) : Bool :=
+  (List.range 64).all fun bk =>
+    stateOK kqkTable (wk * 4096 + wq * 64 + bk) && coverOK kqkTable (wk * 4096 + wq * 64 + bk)
+
 /-- All entries with the white king on square `wk` pass `stateOK` and `coverOK`. -/
-def chunkOK (wk : Nat) : Bool :=
-  (List.range 4096).all fun j => stateOK kqkTable (wk * 4096 + j) && coverOK kqkTable (wk * 4096 + j)
+def chunkOK (wk : Nat) : Bool := (List.range 64).all fun wq => rowOK wk wq
 
 end LeanTheory.Chess
