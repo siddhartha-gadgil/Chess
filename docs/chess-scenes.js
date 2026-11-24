@@ -36,16 +36,17 @@ window.CHESS_SCENES = [
  },
  {
   "id": "kqkBlack",
-  "group": "Endgames",
-  "title": "KQK with Black to move",
-  "desc": "With Black to move there are four cases. Here Black is to move and every reply leads to a certified mate; the other fixtures show checkmate, stalemate and a capture of an undefended queen.",
+  "group": "KQK, Black to move",
+  "title": "White still mates",
+  "desc": "With Black to move there are four cases. Here every reply of Black leads to a certified mate; White plays the table, Black the longest defence.",
   "board": {
-   "fen": "4k3/8/8/8/8/8/8/Q3K3",
-   "turn": "b",
-   "moves": [],
-   "captions": [
-    "kqkBlackForced: Black to move, no capture of the queen, White forces mate within 10."
-   ]
+   "mode": "kqk",
+   "kqk": {
+    "wk": "e1",
+    "wq": "a1",
+    "bk": "e8",
+    "turn": "b"
+   }
   },
   "code": [
    {
@@ -53,6 +54,134 @@ window.CHESS_SCENES = [
     "head": "Theorem",
     "code": "/-- **King and queen versus king, Black to move** (note `N-05`): in a well-formed position whose\npieces are a white king on `wk`, a white queen on `wq` and a black king on `bk`, with Black to move\nand no castling rights, either Black is checkmated, or stalemated, or Black has a legal move\ncapturing the queen that reaches a dead position (bare kings), or White forces mate within 10\nmoves. -/\ntheorem kqk_black_to_move (p : Position) (wk wq bk : Square) (h₁ : wk ≠ wq) (h₂ : wk ≠ bk)\n    (h₃ : wq ≠ bk) (hb : p.board = kqkBoard wk wq bk) (ht : p.turn = .black)\n    (hcr : p.castling = .none) (hw : wellFormed p = true) :\n    isCheckmate p = true ∨ isStalemate p = true ∨\n      (∃ m ∈ legalMoves p, m.dst = wq ∧ IsDead (play p m)) ∨ ForcesMate .white 10 p",
     "file": "LeanTheory/Certificates/Chess/KQKBlack.lean"
+   }
+  ]
+ },
+ {
+  "id": "kqkBlackMated",
+  "group": "KQK, Black to move",
+  "title": "Black is mated",
+  "desc": "Black to move, in check, no legal move.",
+  "board": {
+   "fen": "7k/6Q1/6K1/8/8/8/8/8",
+   "turn": "b",
+   "moves": [],
+   "captions": [
+    "kqkBlackMated: checkmate."
+   ]
+  },
+  "code": [
+   {
+    "kind": "sanity",
+    "head": "Sanity",
+    "code": "/-- The mated fixture is well formed and checkmate (first case of `kqk_black_to_move`). -/\ntheorem kqkBlackMated_checkmate :\n    wellFormed kqkBlackMated = true ∧ isCheckmate kqkBlackMated = true",
+    "file": "LeanTheory/Certificates/Chess/KQKBlack.lean"
+   }
+  ]
+ },
+ {
+  "id": "kqkBlackStale",
+  "group": "KQK, Black to move",
+  "title": "Black is stalemated",
+  "desc": "Black to move, not in check, no legal move: a draw.",
+  "board": {
+   "fen": "k7/2Q5/1K6/8/8/8/8/8",
+   "turn": "b",
+   "moves": [],
+   "captions": [
+    "kqkBlackStalemate: stalemate."
+   ]
+  },
+  "code": [
+   {
+    "kind": "sanity",
+    "head": "Sanity",
+    "code": "/-- The stalemate fixture is well formed and stalemate (second case). -/\ntheorem kqkBlackStalemate_stalemate :\n    wellFormed kqkBlackStalemate = true ∧ isStalemate kqkBlackStalemate = true",
+    "file": "LeanTheory/Certificates/Chess/KQKBlack.lean"
+   }
+  ]
+ },
+ {
+  "id": "kqkBlackCapture",
+  "group": "KQK, Black to move",
+  "title": "Black takes the queen",
+  "desc": "The undefended queen can be captured; the bare kings are a dead position.",
+  "board": {
+   "fen": "4k3/4Q3/8/8/8/8/8/4K3",
+   "turn": "b",
+   "moves": [
+    "e8e7"
+   ],
+   "captions": [
+    "Black to move.",
+    "Kxe7: K v K, dead."
+   ]
+  },
+  "code": [
+   {
+    "kind": "sanity",
+    "head": "Sanity",
+    "code": "/-- In the capture fixture `Kxe7` is legal and reaches a dead position (third case). -/\ntheorem kqkBlackCapture_dead :\n    ∃ m ∈ legalMoves kqkBlackCapture, m.dst = sq 4 7 ∧ IsDead (play kqkBlackCapture m)",
+    "file": "LeanTheory/Certificates/Chess/KQKBlack.lean"
+   }
+  ]
+ },
+ {
+  "id": "krk",
+  "group": "King and rook",
+  "title": "King and rook against king",
+  "desc": "The rook version of the pipeline: White plays the move of the KRK table, which the Lean kernel is checking chunk by chunk; the longest defence needs 16 moves. Click the black king to play Black.",
+  "board": {
+   "mode": "krk",
+   "krk": {
+    "wk": "a1",
+    "wq": "b2",
+    "bk": "c3"
+   }
+  },
+  "code": [
+   {
+    "kind": "ok",
+    "head": "Soundness of the check (compiled)",
+    "code": "/-- **Soundness of the KRK table check**: if every entry passes `krkStateOK`, then every entry of\nnonzero depth `d` is a forced mate for White within `d` moves, for any halfmove clock. -/\ntheorem krk_table_sound (T : Nat → Nat) (hT : ∀ i, i < 262144 → krkStateOK T i = true) :\n    ∀ d, ∀ wk wq bk : Square, krkDepth (T (kqkIdx wk.val wq.val bk.val)) = d → d ≠ 0 →\n      ∀ h, ForcesMate .white d (krkPos wk wq bk .white h)",
+    "file": "LeanTheory/Certificates/Chess/KRKCheck.lean"
+   },
+   {
+    "kind": "ok",
+    "head": "Bridge (compiled, conditional on the table)",
+    "code": "/-- **KRK forced mate for well-formed positions, from a checked table**: every well-formed position\nwhose pieces are a white king on `wk`, a white rook on `wq` and a black king on `bk`, with White\nto move and no castling rights, is a forced mate for White within 16 moves. -/\ntheorem krk_forcesMate_of_table_wellFormed (T : Nat → Nat)\n    (hT : ∀ i, i < 262144 → krkStateOK T i = true ∧ krkCoverOK T i = true)\n    (p : Position) (wk wq bk : Square) (h₁ : wk ≠ wq) (h₂ : wk ≠ bk) (h₃ : wq ≠ bk)\n    (hb : p.board = krkBoard wk wq bk) (ht : p.turn = .white) (hcr : p.castling = .none)\n    (hw : wellFormed p = true) : ForcesMate .white 16 p",
+    "file": "LeanTheory/Certificates/Chess/KRKBridge.lean"
+   }
+  ]
+ },
+ {
+  "id": "krkGame",
+  "group": "King and rook",
+  "title": "KRK: Black to move and the full game",
+  "desc": "As for KQK: with Black to move, mate, stalemate, a capture of an undefended rook, or a forced mate; and from a fresh start with clock at most 118, White wins the game. Both are compiled for every table passing the check.",
+  "board": {
+   "fen": "8/8/8/8/8/8/3kR3/7K",
+   "turn": "b",
+   "moves": [
+    "d2e2"
+   ],
+   "captions": [
+    "Black to move: the rook on e2 is undefended.",
+    "Kxe2: K v K, dead."
+   ]
+  },
+  "code": [
+   {
+    "kind": "ok",
+    "head": "Black to move (compiled, conditional)",
+    "code": "/-- **King and rook versus king, Black to move** (note `N-10`, given a checked table `T`): in a\nwell-formed position whose pieces are a white king on `wk`, a white rook on `wq` and a black king\non `bk`, with Black to move and no castling rights, either Black is checkmated, or stalemated, or\nBlack has a legal move capturing the rook that reaches a dead position (bare kings), or White\nforces mate within 16 moves. -/\ntheorem krk_black_to_move_of_table (T : Nat → Nat)\n    (hT : ∀ i, i < 262144 → krkStateOK T i = true ∧ krkCoverOK T i = true)\n    (p : Position) (wk wq bk : Square) (h₁ : wk ≠ wq) (h₂ : wk ≠ bk)\n    (h₃ : wq ≠ bk) (hb : p.board = krkBoard wk wq bk) (ht : p.turn = .black)\n    (hcr : p.castling = .none) (hw : wellFormed p = true) :\n    isCheckmate p = true ∨ isStalemate p = true ∨\n      (∃ m ∈ legalMoves p, m.dst = wq ∧ IsDead (play p m)) ∨ ForcesMate .white 16 p",
+    "file": "LeanTheory/Certificates/Chess/KRKBlackGame.lean"
+   },
+   {
+    "kind": "ok",
+    "head": "Full game (compiled, conditional)",
+    "code": "/-- **King and rook versus king in the full game, for well-formed positions** (given a checked\ntable `T`): from the start of a game in any well-formed position whose pieces are a white king, a\nwhite rook and a black king, with White to move, no castling rights and halfmove clock at most\n118, White can force a win in `chessGame`, whose value there is `whiteWins`. -/\ntheorem krk_game_whiteWins_of_table_wellFormed (T : Nat → Nat)\n    (hT : ∀ i, i < 262144 → krkStateOK T i = true ∧ krkCoverOK T i = true)\n    (p : Position) (a b c : Square) (h₁ : a ≠ b) (h₂ : a ≠ c)\n    (h₃ : b ≠ c) (hb : p.board = krkBoard a b c) (ht : p.turn = .white)\n    (hcr : p.castling = .none) (hw : wellFormed p = true) (hh : p.halfmove ≤ 118) :\n    chessGame.MaxForces .whiteWins (State.start p) ∧\n      chessGame.value (State.start p) = .whiteWins",
+    "file": "LeanTheory/Certificates/Chess/KRKBlackGame.lean"
    }
   ]
  },
@@ -557,5 +686,29 @@ window.CHESS_DECLS = {
  "kqk_row_0_9": {
   "code": "/-- Entries with the white king on 0 and the queen on 9 pass. -/\ntheorem kqk_row_0_9 : rowOK 0 9 = true",
   "file": "LeanTheory/Certificates/Chess/KQKChunks/C00.lean"
+ },
+ "krkStateOK": {
+  "code": "/-- **The check of one table entry** `i`: depth `0` (no claim), or depth `1 ≤ d ≤ 16`, three\ndistinct squares and an acceptable White move. -/\ndef krkStateOK (T : Nat → Nat) (i : Nat) : Bool :=\n  krkDepth (T i) == 0 ||\n    (krkDepth (T i) ≤ 16 && sqOf (i / 4096) != sqOf (i / 64) && sqOf (i / 4096) != sqOf i &&\n      sqOf (i / 64) != sqOf i &&\n      krkWhiteOK T (krkDepth (T i)) (sqOf (i / 4096)) (sqOf (i / 64)) (sqOf i)\n        (sqOf (krkSrc (T i))) (sqOf (krkDst (T i))))",
+  "file": "LeanTheory/Certificates/Chess/KRKCheck.lean"
+ },
+ "krk_table_sound": {
+  "code": "/-- **Soundness of the KRK table check**: if every entry passes `krkStateOK`, then every entry of\nnonzero depth `d` is a forced mate for White within `d` moves, for any halfmove clock. -/\ntheorem krk_table_sound (T : Nat → Nat) (hT : ∀ i, i < 262144 → krkStateOK T i = true) :\n    ∀ d, ∀ wk wq bk : Square, krkDepth (T (kqkIdx wk.val wq.val bk.val)) = d → d ≠ 0 →\n      ∀ h, ForcesMate .white d (krkPos wk wq bk .white h)",
+  "file": "LeanTheory/Certificates/Chess/KRKCheck.lean"
+ },
+ "krk_forcesMate_of_table_wellFormed": {
+  "code": "/-- **KRK forced mate for well-formed positions, from a checked table**: every well-formed position\nwhose pieces are a white king on `wk`, a white rook on `wq` and a black king on `bk`, with White\nto move and no castling rights, is a forced mate for White within 16 moves. -/\ntheorem krk_forcesMate_of_table_wellFormed (T : Nat → Nat)\n    (hT : ∀ i, i < 262144 → krkStateOK T i = true ∧ krkCoverOK T i = true)\n    (p : Position) (wk wq bk : Square) (h₁ : wk ≠ wq) (h₂ : wk ≠ bk) (h₃ : wq ≠ bk)\n    (hb : p.board = krkBoard wk wq bk) (ht : p.turn = .white) (hcr : p.castling = .none)\n    (hw : wellFormed p = true) : ForcesMate .white 16 p",
+  "file": "LeanTheory/Certificates/Chess/KRKBridge.lean"
+ },
+ "krk_black_to_move_of_table": {
+  "code": "/-- **King and rook versus king, Black to move** (note `N-10`, given a checked table `T`): in a\nwell-formed position whose pieces are a white king on `wk`, a white rook on `wq` and a black king\non `bk`, with Black to move and no castling rights, either Black is checkmated, or stalemated, or\nBlack has a legal move capturing the rook that reaches a dead position (bare kings), or White\nforces mate within 16 moves. -/\ntheorem krk_black_to_move_of_table (T : Nat → Nat)\n    (hT : ∀ i, i < 262144 → krkStateOK T i = true ∧ krkCoverOK T i = true)\n    (p : Position) (wk wq bk : Square) (h₁ : wk ≠ wq) (h₂ : wk ≠ bk)\n    (h₃ : wq ≠ bk) (hb : p.board = krkBoard wk wq bk) (ht : p.turn = .black)\n    (hcr : p.castling = .none) (hw : wellFormed p = true) :\n    isCheckmate p = true ∨ isStalemate p = true ∨\n      (∃ m ∈ legalMoves p, m.dst = wq ∧ IsDead (play p m)) ∨ ForcesMate .white 16 p",
+  "file": "LeanTheory/Certificates/Chess/KRKBlackGame.lean"
+ },
+ "krk_game_whiteWins_of_table_wellFormed": {
+  "code": "/-- **King and rook versus king in the full game, for well-formed positions** (given a checked\ntable `T`): from the start of a game in any well-formed position whose pieces are a white king, a\nwhite rook and a black king, with White to move, no castling rights and halfmove clock at most\n118, White can force a win in `chessGame`, whose value there is `whiteWins`. -/\ntheorem krk_game_whiteWins_of_table_wellFormed (T : Nat → Nat)\n    (hT : ∀ i, i < 262144 → krkStateOK T i = true ∧ krkCoverOK T i = true)\n    (p : Position) (a b c : Square) (h₁ : a ≠ b) (h₂ : a ≠ c)\n    (h₃ : b ≠ c) (hb : p.board = krkBoard a b c) (ht : p.turn = .white)\n    (hcr : p.castling = .none) (hw : wellFormed p = true) (hh : p.halfmove ≤ 118) :\n    chessGame.MaxForces .whiteWins (State.start p) ∧\n      chessGame.value (State.start p) = .whiteWins",
+  "file": "LeanTheory/Certificates/Chess/KRKBlackGame.lean"
+ },
+ "play_krk_rook": {
+  "code": "/-- A non-capturing rook move from a KRK position. -/\ntheorem play_krk_rook (wk wq bk dst : Square) (t : Nat) (h₁ : wk ≠ wq) (h₂ : wq ≠ bk)\n    (hd₀ : dst ≠ wk) (hd₁ : dst ≠ wq) (hd₂ : dst ≠ bk) :\n    play (krkPos wk wq bk .white t) ⟨wq, dst, none⟩ = krkPos wk dst bk .black (t + 1)",
+  "file": "LeanTheory/Certificates/Chess/KRKCheck.lean"
  }
 };

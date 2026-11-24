@@ -149,7 +149,7 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   <div class="title-text">
     <p class="kicker">A theory of chess, checked by Lean 4</p>
     <h1>King and queen beat king</h1>
-    <p class="subtitle">The FIDE rules as computable definitions, a certified forced mate, dead positions and the determinacy of chess, developed with AI agents in the LeanTheory framework</p>
+    <p class="subtitle">The FIDE rules as computable definitions, certified forced mates with queen and with rook, dead positions and the determinacy of chess, developed with AI agents in the LeanTheory framework</p>
     <p class="author">Siddhartha Gadgil</p>
   </div>
   <aside class="notes">The board plays the longest king-and-queen mate, Ka1 Qb2 v Kf5: ten moves, read from the table that the Lean kernel checked.</aside>
@@ -408,6 +408,53 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   </div>
 </section>
 
+<!-- ================================ PART 3b ================================ -->
+<section class="divider" data-background-color="#0b1220">
+  <p class="kicker">Part 3b</p>
+  <h1>King and rook against king</h1>
+  <p class="sub">The same pipeline with a rook: deeper mates, a wider table entry, a second kernel check.</p>
+</section>
+
+<section>
+  <p class="kicker">Untrusted oracle</p>
+  <h2>175,168 positions, depth at most 16</h2>
+  <div class="cols wide-left">
+    <div>
+      <div class="bars" id="krkBars"></div>
+      <div class="bars-x" id="krkBarsX"></div>
+      <p class="caption">Positions with White to move by depth to mate, 1 to 16. The longest, 16 moves, start from Ka1, Rb2 v Kc3 and 120 other positions up to symmetry.</p>
+    </div>
+    <div>
+      <ul class="small">
+        <li>The KQK oracle and validator, generalised by the piece&rsquo;s directions; 18 seconds; the validator agrees on every entry.</li>
+        <li>Black to move: 22,176 positions where the rook hangs, 68 stalemates.</li>
+        <li>Depth 16 needs 5 bits: entries are now 32-bit fields.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Certificate</p>
+  <h2>A rook copy of the checker, the same proofs</h2>
+  <pre class="lean big"><code data-decl="play_krk_rook"></code></pre>
+  <pre class="lean big"><code data-decl="krk_table_sound"></code></pre>
+  <p class="small mt">Renaming <code class="inline">kqk</code> to <code class="inline">krk</code> and the queen to the rook was enough: the symbolic lemmas and the soundness proof went through unchanged, reusing the piece-independent lemmas of the KQK checker. The kernel check of the KRK table runs as another 64 chunk modules (about 9.5 minutes each).</p>
+</section>
+
+<section>
+  <p class="kicker">Results</p>
+  <h2>Conditional on the table, already compiled</h2>
+  <div class="cols wide-left">
+    <div>
+      <pre class="lean"><code data-decl="krk_black_to_move_of_table"></code></pre>
+      <pre class="lean"><code data-decl="krk_game_whiteWins_of_table_wellFormed"></code></pre>
+      <p class="small">For any table passing the check: Black to move splits into the same four cases; the full game is won from a clock of at most 150 &minus; 2&middot;16 = 118.</p>
+    </div>
+    <div class="board" style="width:480px" data-scene="krk"></div>
+  </div>
+</section>
+
 <!-- ================================ PART 4 ================================ -->
 <section class="divider" data-background-color="#0b1220">
   <p class="kicker">Part 4</p>
@@ -423,7 +470,7 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
       <pre class="lean"><code data-decl="dead_KK"></code></pre>
       <pre class="lean"><code data-decl="dead_KNK"></code></pre>
       <pre class="lean"><code data-decl="dead_KBK"></code></pre>
-      <p class="small">An invariant closed under legal moves that excludes checkmate. A king checked by a lone knight or bishop always has a flight square of the other colour, and the enemy king cannot cover it. Guard in the other direction: <code class="inline">initial_not_dead</code>.</p>
+      <p class="small">An invariant closed under legal moves that excludes checkmate. A lone knight or bishop only attacks squares of one colour, so a checked king always has a flight square of the other colour, which the enemy king cannot cover; a ray-reversal lemma shows the bishop never captures the lone king. Guard in the other direction: <code class="inline">initial_not_dead</code>.</p>
     </div>
     <div><div class="board small" style="width:380px" data-scene="deadKBK"></div><p class="caption">Black is in check from the bishop, yet the position is dead.</p></div>
   </div>
@@ -435,7 +482,7 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   <h2>One coordinator, several agents, one validity gate</h2>
   <div class="cols-3">
     <div class="card"><h3>Coordinator</h3><p>Startup audit, research graph, rules kernel, game states, KQK checker and soundness, the full-game argument; integration and audits of all agent work.</p></div>
-    <div class="card"><h3>Agents</h3><p>Determinacy (abstract and chess), the oracle and its validator, special-move fixtures, dead positions (K, KN, KB), the Black-to-move case.</p></div>
+    <div class="card"><h3>Agents</h3><p>Determinacy (abstract and chess), the oracle and its validator, special-move fixtures, dead positions (K, KN, KB), the KQK Black-to-move case, the KRK Black-to-move case and full game.</p></div>
     <div class="card plasma"><h3>Caught along the way</h3><p>A name clash between two agents&rsquo; files; an 11 GB kernel declaration; a memory cap that silently stopped Lean; a test that checked nothing.</p></div>
   </div>
 </section>
@@ -444,10 +491,10 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   <p class="kicker">In numbers</p>
   <h2>Chess in Lean</h2>
   <div class="cols-3">
-    <div class="card"><div class="big">5,175</div><p>hand-written lines of Lean</p></div>
-    <div class="card"><div class="big">272</div><p>hand-written theorems</p></div>
-    <div class="card"><div class="big">4,096</div><p>certificate declarations, all checked</p></div>
-    <div class="card"><div class="big">144,508</div><p>White-to-move KQK positions, all wins</p></div>
+    <div class="card"><div class="big">6,212</div><p>hand-written lines of Lean</p></div>
+    <div class="card"><div class="big">304</div><p>hand-written theorems</p></div>
+    <div class="card"><div class="big">8,192</div><p>certificate declarations (KQK and KRK)</p></div>
+    <div class="card"><div class="big">319,676</div><p>White-to-move KQK and KRK positions, all wins (KRK: kernel check running)</p></div>
     <div class="card"><div class="big">11,891</div><p>declarations in the library axiom audit</p></div>
     <div class="card"><div class="big">0</div><p><code class="inline">sorry</code>, <code class="inline">decide</code>, project axioms</p></div>
   </div>
@@ -459,7 +506,8 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   <div class="cols">
     <ul class="small">
       <li><b>The value of chess</b> (G-3b): open, and far beyond reach.</li>
-      <li>King and rook against king, with faster move generation or symmetry.</li>
+      <li>Finish the KRK kernel check; then KRK unconditionally, with fixtures.</li>
+      <li>Faster kernel move generation or symmetry for larger endgames.</li>
       <li>Replaying recorded games (Kasparov&rsquo;s) as rule fixtures.</li>
       <li>Exactness of depth 10; castling flags without rooks.</li>
     </ul>
@@ -477,6 +525,7 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
 <script src="kqk-table.js"></script>
+<script src="krk-table.js"></script>
 <script src="chess-board.js"></script>
 <script src="chess-scenes.js"></script>
 <script>
@@ -496,19 +545,25 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   });
 
   /* depth distribution (oracle, N-06) */
-  const counts = [2448, 5012, 9064, 19964, 26164, 32064, 32104, 15000, 2680, 8];
-  const bars = document.getElementById("bars"), mx = Math.max(...counts);
-  counts.forEach((n) => {
-    const d = document.createElement("div"); d.style.height = (100 * n / mx) + "%";
-    const s = document.createElement("span"); s.textContent = n.toLocaleString("en"); d.appendChild(s);
-    bars.appendChild(d);
-  });
+  function barChart(id, counts, xid) {
+    const bars = document.getElementById(id), mx = Math.max(...counts);
+    counts.forEach((n, i) => {
+      const d = document.createElement("div"); d.style.height = (100 * n / mx) + "%";
+      const s = document.createElement("span"); s.textContent = n.toLocaleString("en"); d.appendChild(s);
+      bars.appendChild(d);
+      if (xid) { const x = document.createElement("span"); x.textContent = i + 1; document.getElementById(xid).appendChild(x); }
+    });
+  }
+  barChart("bars", [2448, 5012, 9064, 19964, 26164, 32064, 32104, 15000, 2680, 8]);
+  barChart("krkBars", [1512, 4676, 3852, 1900, 4848, 8708, 11320, 17172, 20088, 19016, 20476, 21480,
+    17824, 16136, 5244, 916], "krkBarsX");
 
   /* scenes */
   const SC = {};
   window.CHESS_SCENES.forEach((s) => { SC[s.id] = s.board; });
   SC.titleBg = { mode: "kqk", kqk: { wk: "a1", wq: "b2", bk: "f5" }, controls: false, autoplay: true, loop: true, speed: 1000 };
   SC.kqk = { mode: "kqk", kqk: { wk: "a1", wq: "b2", bk: "f5" } };
+  SC.krk = { mode: "krk", krk: { wk: "a1", wq: "b2", bk: "c3" } };
   SC.bMated = { fen: "7k/6Q1/6K1/8/8/8/8/8", turn: "b", moves: [], controls: false };
   SC.bStale = { fen: "k7/2Q5/1K6/8/8/8/8/8", turn: "b", moves: [], controls: false };
   SC.bCapture = { fen: "4k3/4Q3/8/8/8/8/8/4K3", turn: "b", moves: ["e8e7"], controls: false, autoplay: true, loop: true, speed: 1400 };

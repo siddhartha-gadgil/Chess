@@ -6,9 +6,10 @@
  *   line: { fen, turn, moves: ["f2f3", ...], captions: [...], loop, speed }
  *         steps through a fixed sequence of moves (the fixtures of the Lean sanity suites);
  *   kqk:  { mode: "kqk", kqk: { wk: "a1", wq: "b2", bk: "f5" } }
- *         king and queen against king: White plays the move of the table checked by the Lean
- *         kernel (KQKData.lean, via kqk-table.js); Black plays the longest defence, or the
- *         viewer plays Black by clicking the black king and a target square.
+ *   krk:  { mode: "krk", krk: { wk: "a1", wq: "b2", bk: "c3" } }   (wq is the rook's square)
+ *         king and queen (rook) against king: White plays the move of the table checked by the
+ *         Lean kernel (KQKData.lean / KRKData.lean, via kqk-table.js / krk-table.js); Black plays
+ *         the longest defence, or the viewer plays Black by clicking the black king and a square.
  * Squares are indexed 8 * rank + file with a1 = 0, as in the Lean kernel.
  */
 (function () {
@@ -59,56 +60,75 @@
     return { board: b, from, to, capture };
   }
 
-  /* ---------- king and queen against king (the certified table) ---------- */
-  let TABLE = null;
-  function table() {
-    if (TABLE) return TABLE;
-    if (!window.KQK_TABLE_B64) return null;
-    const bin = atob(window.KQK_TABLE_B64);
-    const dv = new DataView(new ArrayBuffer(bin.length));
-    for (let i = 0; i < bin.length; i++) dv.setUint8(i, bin.charCodeAt(i));
-    TABLE = new Uint16Array(bin.length / 2);
-    for (let i = 0; i < TABLE.length; i++) TABLE[i] = dv.getUint16(2 * i, true);
-    return TABLE;
+  /* ---------- king and queen / rook against king (the certified tables) ---------- */
+  /* An engine for K + X v K, X = queen or rook: the table (decoded lazily from base64), the
+     entry layout, and the attack and move rules for three pieces. */
+  function makeEngine(cfg) {
+    let TABLE = null;
+    const E = {
+      piece: cfg.piece, maxDepth: cfg.maxDepth, longest: cfg.longest,
+      table() {
+        if (TABLE) return TABLE;
+        const b64 = window[cfg.tableVar];
+        if (!b64) return null;
+        const bin = atob(b64), w = cfg.bytes, n = bin.length / w;
+        TABLE = new Uint32Array(n);
+        for (let i = 0; i < n; i++) {
+          let e = 0;
+          for (let k = w - 1; k >= 0; k--) e = e * 256 + bin.charCodeAt(w * i + k);
+          TABLE[i] = e;
+        }
+        return TABLE;
+      },
+      entry(wk, wq, bk) {
+        const t = E.table(); if (!t) return null;
+        const e = t[4096 * wk + 64 * wq + bk];
+        return { raw: e, depth: e % cfg.dBase, src: Math.floor(e / cfg.dBase) % 64,
+          dst: Math.floor(e / (cfg.dBase * 64)) % 64 };
+      },
+      hasEntry(i) { const t = E.table(); return t && t[i] % cfg.dBase !== 0; },
+      adj(a, b) {
+        return a !== b && Math.abs(fileOf(a) - fileOf(b)) <= 1 && Math.abs(rankOf(a) - rankOf(b)) <= 1;
+      },
+      /* does the white piece on q attack square s, with `block` the occupied squares? */
+      pieceAttacks(q, s, block) {
+        if (q === s) return false;
+        const df = Math.sign(fileOf(s) - fileOf(q)), dr = Math.sign(rankOf(s) - rankOf(q));
+        const lf = Math.abs(fileOf(s) - fileOf(q)), lr = Math.abs(rankOf(s) - rankOf(q));
+        const line = lf === 0 || lr === 0, diag = lf === lr;
+        if (!(line || (cfg.piece === "q" && diag))) return false;
+        let f = fileOf(q) + df, r = rankOf(q) + dr;
+        while (8 * r + f !== s) {
+          if (block.includes(8 * r + f)) return false;
+          f += df; r += dr;
+        }
+        return true;
+      },
+      blackInCheck(st) { return E.pieceAttacks(st.wq, st.bk, [st.wk]); },
+      blackMoves(st) {
+        const out = [];
+        for (let df = -1; df <= 1; df++) for (let dr = -1; dr <= 1; dr++) {
+          if (!df && !dr) continue;
+          const f = fileOf(st.bk) + df, r = rankOf(st.bk) + dr;
+          if (f < 0 || f > 7 || r < 0 || r > 7) continue;
+          const t = 8 * r + f;
+          if (t === st.wk || E.adj(t, st.wk)) continue;
+          if (t === st.wq) { out.push(t); continue; }    // capture of an undefended piece
+          if (E.pieceAttacks(st.wq, t, [st.wk])) continue;
+          out.push(t);
+        }
+        return out;
+      }
+    };
+    return E;
   }
-  const KQK = {
-    entry(wk, wq, bk) {
-      const t = table(); if (!t) return null;
-      const e = t[4096 * wk + 64 * wq + bk];
-      return { raw: e, depth: e % 16, src: (e >> 4) % 64, dst: (e >> 10) % 64 };
-    },
-    adj(a, b) {
-      return a !== b && Math.abs(fileOf(a) - fileOf(b)) <= 1 && Math.abs(rankOf(a) - rankOf(b)) <= 1;
-    },
-    /* does the queen on q attack square s, with `block` the occupied squares? */
-    queenAttacks(q, s, block) {
-      if (q === s) return false;
-      const df = Math.sign(fileOf(s) - fileOf(q)), dr = Math.sign(rankOf(s) - rankOf(q));
-      const lf = Math.abs(fileOf(s) - fileOf(q)), lr = Math.abs(rankOf(s) - rankOf(q));
-      if (!(lf === 0 || lr === 0 || lf === lr)) return false;
-      let f = fileOf(q) + df, r = rankOf(q) + dr;
-      while (8 * r + f !== s) {
-        if (block.includes(8 * r + f)) return false;
-        f += df; r += dr;
-      }
-      return true;
-    },
-    blackInCheck(st) { return KQK.queenAttacks(st.wq, st.bk, [st.wk]); },
-    blackMoves(st) {
-      const out = [];
-      for (let df = -1; df <= 1; df++) for (let dr = -1; dr <= 1; dr++) {
-        if (!df && !dr) continue;
-        const f = fileOf(st.bk) + df, r = rankOf(st.bk) + dr;
-        if (f < 0 || f > 7 || r < 0 || r > 7) continue;
-        const t = 8 * r + f;
-        if (t === st.wk || KQK.adj(t, st.wk)) continue;
-        if (t === st.wq) { out.push(t); continue; }      // capture of an undefended queen
-        if (KQK.queenAttacks(st.wq, t, [st.wk])) continue;
-        out.push(t);
-      }
-      return out;
-    }
+  const ENGINES = {
+    kqk: makeEngine({ piece: "q", tableVar: "KQK_TABLE_B64", bytes: 2, dBase: 16, maxDepth: 10,
+      longest: { wk: "a1", wq: "b2", bk: "f5" } }),
+    krk: makeEngine({ piece: "r", tableVar: "KRK_TABLE_B64", bytes: 3, dBase: 32, maxDepth: 16,
+      longest: { wk: "a1", wq: "b2", bk: "c3" } })
   };
+  const KQK = ENGINES.kqk;
 
   /* ---------- the widget ---------- */
   function ChessBoard(el, scene) {
@@ -129,7 +149,9 @@
     el.appendChild(boardEl);
     const cap = document.createElement("div"); cap.className = "cb-cap"; el.appendChild(cap);
     const bar = document.createElement("div"); bar.className = "cb-bar"; el.appendChild(bar);
-    const kqkMode = scene.mode === "kqk";
+    const kqkMode = scene.mode === "kqk" || scene.mode === "krk";
+    const E = ENGINES[scene.mode] || ENGINES.kqk;
+    const pos0 = scene.kqk || scene.krk;
     const speed = scene.speed || (kqkMode ? 900 : 1100);
     let active = false, timer = null, playing = !!scene.autoplay;
     let ply = 0, frames = [], sel = null;
@@ -152,7 +174,7 @@
     }
     function kqkFrame(st, from, to) {
       const b = new Array(64).fill(null);
-      b[st.wk] = { c: "w", t: "k" }; b[st.wq] = { c: "w", t: "q" }; b[st.bk] = { c: "b", t: "k" };
+      b[st.wk] = { c: "w", t: "k" }; b[st.wq] = { c: "w", t: E.piece }; b[st.bk] = { c: "b", t: "k" };
       if (st.captured) b[st.wq] = null, b[st.bk] = { c: "b", t: "k" };
       return { board: b, from, to, st: Object.assign({}, st) };
     }
@@ -164,10 +186,10 @@
       const st = frames[ply].st;
       if (st.over) return;
       if (st.turn === "b") {
-        const ms = KQK.blackMoves(st);
-        if (!ms.length) st.over = KQK.blackInCheck(st) ? "mate" : "stalemate";
+        const ms = E.blackMoves(st);
+        if (!ms.length) st.over = E.blackInCheck(st) ? "mate" : "stalemate";
       } else {
-        const e = KQK.entry(st.wk, st.wq, st.bk);
+        const e = E.entry(st.wk, st.wq, st.bk);
         if (!e || !e.depth) st.over = "noentry";
       }
     }
@@ -177,7 +199,7 @@
     }
     function kqkWhite() {
       const st = Object.assign({}, frames[ply].st);
-      const e = KQK.entry(st.wk, st.wq, st.bk);
+      const e = E.entry(st.wk, st.wq, st.bk);
       if (!e || !e.depth) return false;
       if (e.src === st.wk) st.wk = e.dst; else st.wq = e.dst;
       st.turn = "b"; st.over = null;
@@ -185,14 +207,14 @@
     }
     function kqkBlack(target) {
       const st = Object.assign({}, frames[ply].st);
-      const ms = KQK.blackMoves(st);
+      const ms = E.blackMoves(st);
       if (!ms.length) return false;
       let t = target;
       if (t === undefined) {        // longest defence: the reply of largest certified depth
         let best = -1;
         for (const m of ms) {
           if (m === st.wq) { t = m; break; }
-          const e = KQK.entry(st.wk, st.wq, m);
+          const e = E.entry(st.wk, st.wq, m);
           if (e && e.depth > best) { best = e.depth; t = m; }
         }
       }
@@ -221,7 +243,7 @@
       timer = setTimeout(() => {
         const moved = step();
         if (!moved) {
-          if (kqkMode && scene.loop) { setTimeout(() => { kqkStart(scene.kqk); tick(); }, 1600); return; }
+          if (kqkMode && scene.loop) { setTimeout(() => { kqkStart(pos0); tick(); }, 1600); return; }
           playing = false; updateBar(); return;
         }
         tick();
@@ -236,15 +258,15 @@
       playBtn = btn("▶", "Play / pause", () => { playing = !playing; updateBar(); tick(); }, "cb-play");
       btn("▶|", "Forward one move", () => { playing = false; updateBar(); step(); });
       if (kqkMode) {
-        btn("Longest", "The position needing the full 10 moves", () => {
-          playing = false; updateBar(); kqkStart({ wk: "a1", wq: "b2", bk: "f5" });
+        btn("Longest", "A position needing the full " + E.maxDepth + " moves", () => {
+          playing = false; updateBar(); kqkStart(E.longest);
         });
         btn("Random", "A random position with White to move", () => {
           playing = false; updateBar();
-          const t = table(); if (!t) return;
+          if (!E.table()) return;
           for (;;) {
             const i = Math.floor(Math.random() * 262144);
-            if (t[i] % 16) { kqkStart({ wk: sqName(i >> 12), wq: sqName((i >> 6) & 63), bk: sqName(i & 63) }); break; }
+            if (E.hasEntry(i)) { kqkStart({ wk: sqName(i >> 12), wq: sqName((i >> 6) & 63), bk: sqName(i & 63) }); break; }
           }
         });
       }
@@ -257,7 +279,7 @@
         const i = +d.dataset.sq, st = frames[ply].st;
         if (st.over || st.turn !== "b") return;
         if (sel === null) { if (i === st.bk) { sel = i; render(); } return; }
-        const ok = KQK.blackMoves(st).includes(i);
+        const ok = E.blackMoves(st).includes(i);
         sel = null;
         if (ok) { playing = false; updateBar(); kqkBlack(i); setTimeout(() => { if (!frames[ply].st.over) kqkWhite(); }, 450); }
         else render();
@@ -277,15 +299,15 @@
       }
       if (kqkMode) {
         const st = fr.st;
-        if (sel !== null) KQK.blackMoves(st).forEach((t) => sqEls[t].classList.add("cb-target"));
-        const e = st.turn === "w" ? KQK.entry(st.wk, st.wq, st.bk) : null;
+        if (sel !== null) E.blackMoves(st).forEach((t) => sqEls[t].classList.add("cb-target"));
+        const e = st.turn === "w" ? E.entry(st.wk, st.wq, st.bk) : null;
         let s;
         if (st.over === "mate") s = "Checkmate: the certified line ends here.";
         else if (st.over === "stalemate") s = "Stalemate.";
-        else if (st.over === "captured") s = "Black captured the queen: K v K, a dead position.";
+        else if (st.over === "captured") s = "Black captured the " + (E.piece === "q" ? "queen" : "rook") + ": K v K, a dead position.";
         else if (st.over === "noentry") s = "No table entry (not a legal White-to-move position).";
         else if (st.turn === "w") s = "White to move: mate within " + e.depth + " (certified).";
-        else s = "Black to move" + (KQK.blackInCheck(st) ? " (in check)" : "") +
+        else s = "Black to move" + (E.blackInCheck(st) ? " (in check)" : "") +
           (scene.controls !== false ? ": click the black king to play Black." : ".");
         status.textContent = s;
         cap.textContent = scene.captions && ply === 0 ? scene.captions[0] : "";
@@ -299,15 +321,16 @@
       cap.style.display = cap.textContent ? "" : "none";
     }
 
-    if (kqkMode) kqkStart(scene.kqk); else { buildLine(); render(); }
+    if (kqkMode) kqkStart(pos0); else { buildLine(); render(); }
     updateBar();
     return {
       setActive(on) { active = on; if (on) { if (scene.autoplay) playing = true; updateBar(); tick(); } else clearTimeout(timer); },
-      reset() { if (kqkMode) kqkStart(scene.kqk); else restart(); },
+      reset() { if (kqkMode) kqkStart(pos0); else restart(); },
       state() { return frames[ply]; }
     };
   }
   ChessBoard.KQK = KQK;
+  ChessBoard.ENGINES = ENGINES;
   ChessBoard.applyMove = applyMove;
   ChessBoard.parseFen = parseFen;
   ChessBoard.sqIdx = sqIdx;
