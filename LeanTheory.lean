@@ -15,6 +15,11 @@ public import LeanTheory.Certificates.Chess.KQKBridge
 public import LeanTheory.Certificates.Chess.KQKCheck
 public import LeanTheory.Certificates.Chess.KQKData
 public import LeanTheory.Certificates.Chess.KQKGame
+public import LeanTheory.Certificates.Chess.KRK
+public import LeanTheory.Certificates.Chess.KRKBlackGame
+public import LeanTheory.Certificates.Chess.KRKBridge
+public import LeanTheory.Certificates.Chess.KRKCheck
+public import LeanTheory.Certificates.Chess.KRKData
 public import LeanTheory.Certificates.ConvAlgebra
 public import LeanTheory.Certificates.DigitSumCert
 public import LeanTheory.Certificates.DiscreteMaxPrinciple

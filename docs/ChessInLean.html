@@ -439,17 +439,17 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   <h2>A rook copy of the checker, the same proofs</h2>
   <pre class="lean big"><code data-decl="play_krk_rook"></code></pre>
   <pre class="lean big"><code data-decl="krk_table_sound"></code></pre>
-  <p class="small mt">Renaming <code class="inline">kqk</code> to <code class="inline">krk</code> and the queen to the rook was enough: the symbolic lemmas and the soundness proof went through unchanged, reusing the piece-independent lemmas of the KQK checker. The kernel check of the KRK table runs as another 64 chunk modules (about 9.5 minutes each).</p>
+  <p class="small mt">Renaming <code class="inline">kqk</code> to <code class="inline">krk</code> and the queen to the rook was enough: the symbolic lemmas and the soundness proof went through unchanged, reusing the piece-independent lemmas of the KQK checker. The kernel checked the KRK table as another 64 chunk modules (about 9.5 minutes each); all pass.</p>
 </section>
 
 <section>
   <p class="kicker">Results</p>
-  <h2>Conditional on the table, already compiled</h2>
+  <h2>King and rook beat king</h2>
   <div class="cols wide-left">
     <div>
-      <pre class="lean"><code data-decl="krk_black_to_move_of_table"></code></pre>
-      <pre class="lean"><code data-decl="krk_game_whiteWins_of_table_wellFormed"></code></pre>
-      <p class="small">For any table passing the check: Black to move splits into the same four cases; the full game is won from a clock of at most 150 &minus; 2&middot;16 = 118.</p>
+      <pre class="lean"><code data-decl="krk_forcesMate_wellFormed"></code></pre>
+      <pre class="lean"><code data-decl="krk_game_whiteWins_wellFormed"></code></pre>
+      <p class="small">Also <code class="inline">krk_black_to_move</code>: the same four cases as for KQK. The full game is won from a clock of at most 150 &minus; 2&middot;16 = 118. Standard axioms only.</p>
     </div>
     <div class="board" style="width:480px" data-scene="krk"></div>
   </div>
@@ -494,8 +494,8 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
     <div class="card"><div class="big">6,212</div><p>hand-written lines of Lean</p></div>
     <div class="card"><div class="big">304</div><p>hand-written theorems</p></div>
     <div class="card"><div class="big">8,192</div><p>certificate declarations (KQK and KRK)</p></div>
-    <div class="card"><div class="big">319,676</div><p>White-to-move KQK and KRK positions, all wins (KRK: kernel check running)</p></div>
-    <div class="card"><div class="big">11,891</div><p>declarations in the library axiom audit</p></div>
+    <div class="card"><div class="big">319,676</div><p>White-to-move KQK and KRK positions, all certified wins</p></div>
+    <div class="card"><div class="big">16,558</div><p>declarations in the library axiom audit</p></div>
     <div class="card"><div class="big">0</div><p><code class="inline">sorry</code>, <code class="inline">decide</code>, project axioms</p></div>
   </div>
 </section>
@@ -506,10 +506,10 @@ code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #e
   <div class="cols">
     <ul class="small">
       <li><b>The value of chess</b> (G-3b): open, and far beyond reach.</li>
-      <li>Finish the KRK kernel check; then KRK unconditionally, with fixtures.</li>
+      <li>One checker generic in the piece; KRK fixtures; exactness of the depths 10 and 16.</li>
       <li>Faster kernel move generation or symmetry for larger endgames.</li>
       <li>Replaying recorded games (Kasparov&rsquo;s) as rule fixtures.</li>
-      <li>Exactness of depth 10; castling flags without rooks.</li>
+      <li>Castling flags without rooks.</li>
     </ul>
     <div class="card">
       <h3>Links</h3>

@@ -177,7 +177,7 @@ footer { margin-top: 64px; padding: 28px 0 40px; border-top: 1px solid var(--lin
     <div class="hero-text">
       <p class="kicker">A theory of chess, checked by Lean 4</p>
       <h1>King and queen beat king</h1>
-      <p class="tagline">The FIDE rules as computable definitions, a machine-checked proof that king and queen force mate within ten moves (and king and rook within sixteen), the dead positions with a lone knight or bishop, and the determinacy of chess. Every claim marked proved is a compiled Lean theorem.</p>
+      <p class="tagline">The FIDE rules as computable definitions, machine-checked proofs that king and queen force mate within ten moves and king and rook within sixteen, the dead positions with a lone knight or bishop, and the determinacy of chess. Every claim marked proved is a compiled Lean theorem.</p>
       <p class="author">Siddhartha Gadgil</p>
     </div>
     <div class="links">
@@ -214,8 +214,9 @@ footer { margin-top: 64px; padding: 28px 0 40px; border-top: 1px solid var(--lin
 <tr><td>King and queen v king, White to move: mate within 10</td><td><code>kqk_forcesMate_wellFormed</code></td><td><span class="st ok">proved</span></td></tr>
 <tr><td>&hellip; in the full game with all draw rules (clock &le; 130)</td><td><code>kqk_game_whiteWins_wellFormed</code></td><td><span class="st ok">proved</span></td></tr>
 <tr><td>&hellip; Black to move: mated, stalemated, takes the queen, or mated within 10</td><td><code>kqk_black_to_move</code></td><td><span class="st ok">proved</span></td></tr>
-<tr><td>King and rook v king, White to move: mate within 16</td><td><code>krk_forcesMate_wellFormed</code></td><td><span class="st run">kernel check running</span></td></tr>
-<tr><td>&hellip; for any table passing the check (also Black to move, and the full game with clock &le; 118)</td><td><code>krk_forcesMate_of_table_wellFormed</code>, <code>krk_black_to_move_of_table</code>, <code>krk_game_whiteWins_of_table_wellFormed</code></td><td><span class="st cond">proved, conditional</span></td></tr>
+<tr><td>King and rook v king, White to move: mate within 16</td><td><code>krk_forcesMate_wellFormed</code></td><td><span class="st ok">proved</span></td></tr>
+<tr><td>&hellip; in the full game with all draw rules (clock &le; 118)</td><td><code>krk_game_whiteWins_wellFormed</code></td><td><span class="st ok">proved</span></td></tr>
+<tr><td>&hellip; Black to move: mated, stalemated, takes the rook, or mated within 16</td><td><code>krk_black_to_move</code></td><td><span class="st ok">proved</span></td></tr>
 <tr><td>King v king is a dead position</td><td><code>dead_KK</code></td><td><span class="st ok">proved</span></td></tr>
 <tr><td>King and knight v king is dead (knight of either colour)</td><td><code>dead_KNK</code></td><td><span class="st ok">proved</span></td></tr>
 <tr><td>King and bishop v king is dead (bishop of either colour)</td><td><code>dead_KBK</code></td><td><span class="st ok">proved</span></td></tr>
@@ -239,7 +240,7 @@ footer { margin-top: 64px; padding: 28px 0 40px; border-top: 1px solid var(--lin
     <div class="bars" id="krkBars"></div>
     <div class="bars-x" id="krkBarsX"></div>
     <p class="muted" style="font-size:15px">Positions by depth to mate (moves of White), 1 to 16.</p>
-    <p>The checker is the rook copy of the KQK checker (5-bit depths), and its soundness, the bridge to every well-formed position, the Black-to-move split and the full-game win are compiled for any table that passes it. The kernel check of the table itself runs as 64 chunk modules; <code>krk_forcesMate_wellFormed</code> compiles once all of them pass.</p>
+    <p>The checker is the rook copy of the KQK checker (5-bit depths), with the same soundness proof. All 64 chunk modules of the table pass the kernel check, so <code>krk_forcesMate_wellFormed</code>, <code>krk_black_to_move</code> and the full-game win <code>krk_game_whiteWins_wellFormed</code> (clock &le; 118) are compiled theorems, with the standard axioms only.</p>
   </div>
 </div>
 
@@ -257,7 +258,7 @@ footer { margin-top: 64px; padding: 28px 0 40px; border-top: 1px solid var(--lin
   <div class="card"><h3>Certificate</h3><p>A Boolean check of one table entry, proved sound once. Symbolic lemmas describe king and queen moves, so the kernel only evaluates three-piece positions.</p></div>
   <div class="card"><h3>The full game</h3><p>A rank (twice the depth) strictly decreases along every certified line, so no position repeats and the clock stays low: White wins the actual game.</p></div>
   <div class="card"><h3>Dead positions</h3><p>King against king, king and knight, king and bishop: invariants closed under legal moves. A lone knight or bishop only attacks squares of one colour, so a checked king always has a flight square; the bishop can never capture the lone king. The initial position is not dead.</p></div>
-  <div class="card"><h3>King and rook</h3><p>The KQK pipeline with a rook: 5-bit depths up to 16, the same symbolic lemmas, the same soundness proof, and a second 64-chunk kernel check.</p></div>
+  <div class="card"><h3>King and rook</h3><p>The KQK pipeline with a rook: 5-bit depths up to 16, the same symbolic lemmas, the same soundness proof, a second 64-chunk kernel check; Black to move and the full game as for KQK.</p></div>
   <div class="card open"><h3>Research graph</h3><p>Goals, questions and notes with evidence levels: a result counts as established only once a named Lean declaration compiles.</p></div>
 </div>
 
@@ -266,7 +267,7 @@ footer { margin-top: 64px; padding: 28px 0 40px; border-top: 1px solid var(--lin
   <div class="num"><b>6,212</b><span>hand-written lines of Lean for chess</span></div>
   <div class="num"><b>304</b><span>hand-written theorems</span></div>
   <div class="num"><b>8,192</b><span>certificate declarations (KQK and KRK)</span></div>
-  <div class="num"><b>144,508</b><span>positions with White to move, all certified wins</span></div>
+  <div class="num"><b>319,676</b><span>KQK and KRK positions with White to move, all certified wins</span></div>
   <div class="num"><b>10</b><span>moves: the proved bound, needed from Ka1, Qb2 v Kf5</span></div>
   <div class="num"><b>&asymp; 8.5 h</b><span>of kernel time for each table check</span></div>
   <div class="num"><b>16</b><span>moves: the KRK bound, needed from Ka1, Rb2 v Kc3</span></div>

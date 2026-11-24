@@ -68,20 +68,19 @@ SCENES = [
                "captions": ["Black to move.", "Kxe7: K v K, dead."]},
      "code": [code("sanity", "Sanity", "kqkBlackCapture_dead")]},
     {"id": "krk", "group": "King and rook", "title": "King and rook against king",
-     "desc": "The rook version of the pipeline: White plays the move of the KRK table, which the "
-             "Lean kernel is checking chunk by chunk; the longest defence needs 16 moves. Click "
-             "the black king to play Black.",
+     "desc": "The rook version of the pipeline: White plays the move of the KRK table that the "
+             "Lean kernel checked entry by entry; the longest defence needs 16 moves. Click the "
+             "black king to play Black.",
      "board": {"mode": "krk", "krk": {"wk": "a1", "wq": "b2", "bk": "c3"}},
-     "code": [code("ok", "Soundness of the check (compiled)", "krk_table_sound"),
-              code("ok", "Bridge (compiled, conditional on the table)", "krk_forcesMate_of_table_wellFormed")]},
+     "code": [code("goal", "Theorem", "krk_forcesMate_wellFormed"),
+              code("ok", "Soundness of the check", "krk_table_sound")]},
     {"id": "krkGame", "group": "King and rook", "title": "KRK: Black to move and the full game",
      "desc": "As for KQK: with Black to move, mate, stalemate, a capture of an undefended rook, or "
-             "a forced mate; and from a fresh start with clock at most 118, White wins the game. "
-             "Both are compiled for every table passing the check.",
+             "a forced mate; and from a fresh start with clock at most 118, White wins the game.",
      "board": {"fen": "8/8/8/8/8/8/3kR3/7K", "turn": "b", "moves": ["d2e2"],
                "captions": ["Black to move: the rook on e2 is undefended.", "Kxe2: K v K, dead."]},
-     "code": [code("ok", "Black to move (compiled, conditional)", "krk_black_to_move_of_table"),
-              code("ok", "Full game (compiled, conditional)", "krk_game_whiteWins_of_table_wellFormed")]},
+     "code": [code("goal", "Black to move", "krk_black_to_move"),
+              code("goal", "Full game", "krk_game_whiteWins_wellFormed")]},
     {"id": "kqkGame", "group": "Endgames", "title": "KQK in the full game",
      "desc": "The same result in the game with every automatic draw rule: from the start of a "
              "game in a KQK position, White forces a win and the game value is whiteWins.",
@@ -180,7 +179,8 @@ DECLS = [("Position", True), ("legalMoves", True), ("samePosition", True),
          ("knk_flight", False), ("initial_not_dead", False), ("kqk_row_0_9", False),
          ("krkStateOK", True), ("krk_table_sound", False), ("krk_forcesMate_of_table_wellFormed", False),
          ("krk_black_to_move_of_table", False), ("krk_game_whiteWins_of_table_wellFormed", False),
-         ("play_krk_rook", False), ("dead_KBK", False)]
+         ("play_krk_rook", False), ("krk_forcesMate_wellFormed", False),
+         ("krk_black_to_move", False), ("krk_game_whiteWins_wellFormed", False)]
 CHUNK = (ROOT / "LeanTheory/Certificates/Chess/KQKChunks/C00.lean").read_text()
 SRC["LeanTheory/Certificates/Chess/KQKChunks/C00.lean"] = CHUNK
 

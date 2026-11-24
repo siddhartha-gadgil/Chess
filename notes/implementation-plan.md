@@ -12,7 +12,8 @@ Seeded 2026-11-20 with goals `G-1`–`G-4`, questions `Q-1`–`Q-9` and notes `N
 
 - Verified: **KQK is a forced win for White to move, within 10 moves** (`kqk_forcesMate_wellFormed`,
   `G-2`); chess is a determined finite game (`chess_determined_initial`, `G-3(a)`); KvK and KNvK
-  are dead, and KBvK (`N-07`); in the full game with draw rules KQK from a fresh start is a win
+  are dead, and KBvK (`N-07`); **KRK is a forced win within 16** (`krk_forcesMate_wellFormed`,
+  `krk_black_to_move`, `krk_game_whiteWins_wellFormed`, `N-10`); in the full game with draw rules KQK from a fresh start is a win
   (`kqk_game_whiteWins_wellFormed`); game states, FIDE automatic draws, `wellFormed`, `ForcesMate` with a sound checker
   (`N-03`); the rules kernel `LeanTheory.Chess` with its fixtures (perft 20/400/8 902 and special
   moves; `N-02`), and abstract Zermelo determinacy `LeanTheory.Games` (`N-04`).
@@ -50,7 +51,7 @@ Questions may be primary research outputs or auxiliary prerequisites.
 | `Q-5a` | Is the game determined under the chosen rule model? | `G-3`, `Q-5` | open (answer known in literature) | Yes, by Zermelo (`S-4`); to formalise in `N-04` |
 | `Q-6` | How to define and decide dead positions (5.2.2) | `N-03`, `N-07` | open | Semantic definition; decide only for special material |
 | `Q-7` | Which collection of Kasparov games (URL, locators, terms of use) serves as fixtures? | `N-09` | open (user input) | none |
-| `N-10` | `chess/N-10-krk.md` — KRK forced mate within 16 | `G-4` | `N-05` pipeline ✓ | moderate | stated / certificate check running | Kernel-check 64 chunks; bridge |
+| `N-10` | `chess/N-10-krk.md` — KRK forced mate within 16 | `G-4` | `N-05` pipeline ✓ | moderate | **verified** (White/Black to move, full game) | KRK fixtures; generic checker |
 | `Q-8` | KQK proof route: human strategy, kernel-checked retrograde certificate, or hybrid with symmetry? | `N-05` | open | Recommended: certificate + symmetry |
 | `Q-9` | Which partial results toward `Q-5` are feasible and worthwhile? | `G-3` | open | Determinacy, certified endgames (`N-08`) |
 
@@ -227,6 +228,11 @@ the physical model.
   warning-free; axiom audit passed for 11 846 declarations.
 - 2026-11-24 — `initial_not_dead` (sanity). `kqk_black_to_move` (sub-agent, `KQKBlack.lean`):
   `G-2` achieved in full. Build warning-free; axiom audit passed for 11 891 declarations.
+- 2026-11-24 — Website and slides in `docs/` (modelled on the GameOfLife site). `N-10` KRK:
+  generalised oracle and validator (all 175 168 White-to-move states win, max depth 16), rook copy
+  of the checker, 64 chunk modules all pass, `krk_forcesMate_wellFormed`, `krk_black_to_move`,
+  `krk_game_whiteWins_wellFormed` compiled (conditional parts by sub-agent). Axiom audit passed for
+  16 558 declarations.
 
 ## 12. Implementation and workstation log
 
