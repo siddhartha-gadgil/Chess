@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess in Lean</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/theme/white.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap">
+<style>
+:root {
+  --ink: #172033; --muted: #5b6578; --line: #dfe2e8; --paper: #fbfaf6; --card: #ffffff;
+  --accent: #0b7285; --accent-soft: #e6f4f6; --plasma: #d9480f; --plasma-soft: #fff1e7;
+  --good: #2b8a3e; --good-soft: #ebf7ee; --bad: #c92a2a; --bad-soft: #fdecec;
+  --gold: #b7791f; --gold-soft: #fdf6e3;
+  --night: #0b1220; --night-2: #131d33; --night-ink: #e8edf6; --night-muted: #9aa6bd;
+  --sq-light: #e8e2d0; --sq-dark: #6f8f9a;
+  --r-background-color: var(--paper);
+  --r-main-font: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+  --r-main-font-size: 36px;
+  --r-main-color: var(--ink);
+  --r-heading-font: "Source Serif 4", Georgia, serif;
+  --r-heading-color: var(--ink);
+  --r-heading-text-transform: none;
+  --r-heading-font-weight: 600;
+  --r-heading-letter-spacing: -0.01em;
+  --r-heading1-size: 2.1em;
+  --r-heading2-size: 1.4em;
+  --r-link-color: var(--accent);
+  --r-link-color-hover: var(--plasma);
+  --r-code-font: "JetBrains Mono", ui-monospace, monospace;
+  --r-selection-background-color: var(--accent-soft);
+}
+.reveal .slides section { text-align: left; }
+.reveal h1, .reveal h2, .reveal h3 { text-wrap: balance; }
+.reveal h2 { margin: 0 0 0.5em; }
+.reveal .kicker { font-size: 0.5em; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin: 0 0 0.35em; }
+.reveal ul, .reveal ol { margin-left: 1.1em; display: block; }
+.reveal li { margin: 0.32em 0; line-height: 1.3; }
+.reveal li::marker { color: var(--accent); }
+.reveal p { line-height: 1.35; margin: 0.45em 0; }
+.reveal strong { color: inherit; font-weight: 700; }
+.reveal a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.lead { font-size: 1.08em; }
+.muted { color: var(--muted); }
+.small { font-size: 0.8em; }
+.xsmall { font-size: 0.66em; }
+.mt { margin-top: 0.8em !important; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start; }
+.cols.wide-left { grid-template-columns: 1.3fr 1fr; }
+.cols.wide-right { grid-template-columns: 1fr 1.3fr; }
+.cols.center { align-items: center; }
+.cols-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
+.cols-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
+.cols > *, .cols-3 > *, .cols-4 > * { min-width: 0; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 0.6em 0.8em; box-shadow: 0 1px 2px rgba(23, 32, 51, 0.05); }
+.card h3 { font-family: var(--r-main-font); font-size: 0.82em; font-weight: 700; color: var(--accent); margin: 0 0 0.3em; letter-spacing: 0; }
+.card p, .card li { font-size: 0.72em; margin: 0.2em 0; }
+.card.plasma h3 { color: var(--plasma); }
+.card.good h3 { color: var(--good); }
+.card .big { font-family: var(--r-heading-font); font-size: 1.6em; line-height: 1; margin-bottom: 0.15em; color: var(--accent); }
+.callout { border-left: 5px solid var(--plasma); background: var(--plasma-soft); padding: 0.5em 0.8em; border-radius: 0 12px 12px 0; font-size: 0.85em; }
+.callout.accent { border-color: var(--accent); background: var(--accent-soft); }
+.callout.good { border-color: var(--good); background: var(--good-soft); }
+.caption { font-size: 0.5em; color: var(--muted); margin-top: 0.45em !important; line-height: 1.3; }
+
+/* divider and title slides */
+.reveal section.divider { padding-top: 260px; }
+.reveal section.divider h1 { color: var(--night-ink); font-size: 2.2em; max-width: 15em; }
+.reveal section.divider .kicker { color: #66d9e8; font-size: 0.6em; }
+.reveal section.divider p.sub { color: var(--night-muted); font-size: 0.8em; max-width: 34em; }
+.reveal section.title-slide { padding-top: 200px; }
+.title-board { position: absolute; right: 40px; top: 90px; width: 600px; opacity: 0.85; }
+.title-text { position: relative; z-index: 1; max-width: 760px; }
+.reveal section.title-slide h1 { color: var(--night-ink); font-size: 2.05em; line-height: 1.08; }
+.reveal section.title-slide .kicker { color: #66d9e8; font-size: 0.55em; }
+.reveal section.title-slide .subtitle { color: var(--night-muted); font-size: 0.85em; }
+.reveal section.title-slide .author { color: var(--night-ink); font-size: 0.8em; margin-top: 2em; font-weight: 600; }
+
+/* flows */
+.flow { display: flex; align-items: center; gap: 0.45em; }
+.flow.wrap { flex-wrap: wrap; row-gap: 0.6em; }
+.flow .box { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0.45em 0.7em; font-size: 0.66em; text-align: center; line-height: 1.22; flex: 0 1 auto; }
+.flow .box small { display: block; color: var(--muted); font-size: 0.82em; margin-top: 0.15em; }
+.flow .arrow { color: var(--muted); font-size: 0.85em; flex: 0 0 auto; }
+.box.accent { border-color: var(--accent); background: var(--accent-soft); }
+.box.plasma { border-color: var(--plasma); background: var(--plasma-soft); border-style: dashed; }
+.box.good { border-color: var(--good); background: var(--good-soft); color: var(--good); font-weight: 700; }
+.box.dark { background: var(--night); border-color: var(--night); color: var(--night-ink); }
+.box.dark small { color: var(--night-muted); }
+.stack { display: flex; flex-direction: column-reverse; gap: 8px; }
+.stack .layer { display: grid; grid-template-columns: 7.6em 1fr; align-items: center; gap: 0.6em; border-radius: 10px; padding: 0.38em 0.75em; font-size: 0.62em; background: #fff; border: 1px solid var(--line); }
+.stack .layer b { color: var(--accent); font-size: 1.08em; }
+.stack .layer.kernel { background: var(--night); color: var(--night-ink); border-color: var(--night); }
+.stack .layer.kernel b { color: #66d9e8; }
+
+/* code */
+.reveal pre.lean { width: 100%; box-shadow: none; margin: 0.3em 0; font-size: 0.42em; }
+.reveal pre.lean code { overflow-x: auto; background: #0f1626; color: #e6ebf5; border-radius: 12px; padding: 0.8em 1em; max-height: 560px; line-height: 1.5; white-space: pre; }
+.reveal pre.lean.big { font-size: 0.5em; }
+.tok-kw { color: #ff9e64; font-weight: 600; }
+.tok-com { color: #8392ab; font-style: italic; }
+.tok-ty { color: #7dcfff; }
+code.inline { font-family: var(--r-code-font); font-size: 0.85em; background: #eef0f4; padding: 0.05em 0.3em; border-radius: 5px; }
+
+/* depth chart */
+.bars { display: flex; align-items: flex-end; gap: 10px; height: 300px; margin: 0.6em 0 0.2em; }
+.bars div { flex: 1; background: var(--accent); border-radius: 6px 6px 0 0; position: relative; min-height: 3px; }
+.bars div span { position: absolute; top: -1.5em; left: 50%; transform: translateX(-50%); font-size: 0.4em; color: var(--muted); white-space: nowrap; }
+.bars-x { display: flex; gap: 10px; font-size: 0.45em; color: var(--muted); }
+.bars-x span { flex: 1; text-align: center; }
+
+/* board widget */
+.board { width: 520px; }
+.board.small { width: 300px; }
+.cb { background: var(--night); border-radius: 14px; overflow: hidden; box-shadow: 0 10px 30px rgba(11, 18, 32, 0.22); }
+.cb-board { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(8, minmax(0, 1fr)); aspect-ratio: 1; user-select: none; }
+.cb-sq { position: relative; display: flex; align-items: center; justify-content: center; min-height: 0; overflow: hidden; }
+.cb-light { background: var(--sq-light); }
+.cb-dark { background: var(--sq-dark); }
+.cb-sq.cb-last::after { content: ""; position: absolute; inset: 0; background: rgba(252, 196, 25, 0.38); }
+.cb-sq.cb-mark::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 5px #d9480f; }
+.cb-sq.cb-sel::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 5px #0b7285; }
+.cb-sq.cb-target::before { content: ""; position: absolute; width: 26%; height: 26%; border-radius: 50%; background: rgba(11, 114, 133, 0.6); z-index: 2; }
+.cb-pc { position: relative; z-index: 1; font-size: 52px; line-height: 1; }
+.title-board .cb-pc { font-size: 60px; }
+.board.small .cb-pc { font-size: 30px; }
+.cb-pc.cb-w { color: #fdfcf7; text-shadow: 0 0 2px #10151f, 0 0 2px #10151f, 0 1px 2px #10151f; }
+.cb-pc.cb-b { color: #151a24; text-shadow: 0 0 1px #f3f0e6; }
+.cb-rk, .cb-fl { position: absolute; font: 600 12px var(--r-main-font); color: rgba(16, 21, 31, 0.6); }
+.cb-rk { left: 4px; top: 2px; } .cb-fl { right: 4px; bottom: 1px; }
+.board.small .cb-rk, .board.small .cb-fl { display: none; }
+.cb-cap { padding: 6px 12px 0; color: var(--night-ink); font-size: 18px; line-height: 1.3; }
+.cb-bar { display: flex; align-items: center; gap: 6px; padding: 7px 10px; background: var(--night-2); flex-wrap: wrap; }
+.cb-btn { font: 600 16px/1 var(--r-main-font); color: var(--night-ink); background: #1d2a45; border: 1px solid #2c3b5c; border-radius: 7px; min-width: 32px; height: 30px; padding: 0 8px; cursor: pointer; }
+.cb-btn:hover { background: #26375a; border-color: #66d9e8; }
+.cb-play { background: #0b7285; border-color: #0b7285; }
+.cb-status { font-size: 16px; color: var(--night-muted); margin-left: 6px; line-height: 1.2; }
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- ================================ TITLE ================================ -->
+<section class="title-slide" data-background-color="#0b1220">
+  <div class="title-board"><div class="board" style="width:600px" data-scene="titleBg"></div></div>
+  <div class="title-text">
+    <p class="kicker">A theory of chess, checked by Lean 4</p>
+    <h1>King and queen beat king</h1>
+    <p class="subtitle">The FIDE rules as computable definitions, a certified forced mate, dead positions and the determinacy of chess, developed with AI agents in the LeanTheory framework</p>
+    <p class="author">Siddhartha Gadgil</p>
+  </div>
+  <aside class="notes">The board plays the longest king-and-queen mate, Ka1 Qb2 v Kf5: ten moves, read from the table that the Lean kernel checked.</aside>
+</section>
+
+<section>
+  <p class="kicker">The brief</p>
+  <h2>&ldquo;Build a theory of chess&rdquo;</h2>
+  <div class="cols wide-left">
+    <div>
+      <ul>
+        <li>Encode the rules of chess in Lean, from the FIDE Laws.</li>
+        <li>Show that <b>king and queen against king</b> is a winning strategy.</li>
+        <li>What happens with <b>perfect play</b>? A draw, or does White win?</li>
+        <li>User ideas: <i>trap the king against the edge</i>; <i>guard against stalemates</i>.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Seeded research graph</h3>
+      <p><b>G-1</b> faithful rules kernel</p>
+      <p><b>G-2</b> KQK is a forced win</p>
+      <p><b>G-3</b> (a) determinacy, (b) the value of chess</p>
+      <p><b>G-4</b> further endgames, dead positions</p>
+      <p class="muted">plus questions Q-1&hellip;Q-9 and notes N-01&hellip;N-09</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Honesty first</p>
+  <h2>What is known about perfect play</h2>
+  <div class="cols-3">
+    <div class="card good"><h3>Theorem (Zermelo, 1913)</h3><p>A finite two-player game with perfect information has a value: one side can force a win, or both can force a draw.</p></div>
+    <div class="card"><h3>Size</h3><div class="big">4.8&times;10<sup>44</sup></div><p>legal positions (Tromp). Tablebases solve every position with up to 7 pieces, by computation.</p></div>
+    <div class="card plasma"><h3>Not known</h3><p>Which outcome holds from the initial position. &ldquo;Chess is a draw&rdquo; is a belief, not a result: recorded as correction C-1.</p></div>
+  </div>
+  <p class="mt">So G-3 splits: <b>(a)</b> prove determinacy (achieved) and <b>(b)</b> the value itself, an open problem that this project does not claim to solve.</p>
+</section>
+
+<section>
+  <p class="kicker">Method</p>
+  <h2>LeanTheory: a research graph with a validity gate</h2>
+  <div class="cols wide-right">
+    <div>
+      <ul class="small">
+        <li><b>Goals, questions, notes</b> with stable IDs, dependencies and evidence levels.</li>
+        <li>A result is <b>established</b> only when a named Lean declaration compiles.</li>
+        <li>Untrusted computation proposes; the <b>kernel</b> checks.</li>
+        <li>Strict audits of the kernel, sanity checks for every definition.</li>
+        <li>Agents work in parallel on disjoint files; the coordinator integrates.</li>
+      </ul>
+    </div>
+    <div class="stack">
+      <div class="layer kernel"><b>Kernel</b><span>FIDE rules, game states, draw rules</span></div>
+      <div class="layer"><b>Sanity</b><span>perft, special moves, fixtures</span></div>
+      <div class="layer"><b>Theory</b><span>determinacy, dead positions</span></div>
+      <div class="layer"><b>Certificates</b><span>the KQK table check and its soundness</span></div>
+      <div class="layer"><b>Bridge</b><span>from the checked table to every position and the full game</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================ PART 1 ================================ -->
+<section class="divider" data-background-color="#0b1220">
+  <p class="kicker">Part 1</p>
+  <h1>The rules as computable definitions</h1>
+  <p class="sub">The rules of chess define a game, so they are definitions, not laws. The risk is fidelity, and fidelity is tested.</p>
+</section>
+
+<section>
+  <p class="kicker">Kernel</p>
+  <h2>Positions and legal moves</h2>
+  <div class="cols">
+    <pre class="lean"><code data-decl="Position"></code></pre>
+    <div>
+      <pre class="lean"><code data-decl="legalMoves"></code></pre>
+      <p class="small">Squares are <code class="inline">Fin 64</code>; the board is a function from squares to pieces. Castling is the king&rsquo;s two-square move; en passant is a pawn moving onto the en passant target. Everything is evaluated by the Lean kernel itself.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Sanity</p>
+  <h2>Fidelity by computation in the kernel</h2>
+  <div class="cols wide-right center">
+    <div>
+      <div class="card"><h3>Move counts</h3><p><b>20, 400, 8,902</b> sequences of 1, 2, 3 moves from the start.</p><p><b>48, 2,039</b> from Kiwipete, a position full of special moves.</p></div>
+      <div class="card mt"><h3>Negative controls</h3><p>&ldquo;21 moves&rdquo; and the illegal <code class="inline">e1&ndash;e3</code> are rejected by the kernel.</p></div>
+      <p class="caption">All by <code class="inline">kernel_fact</code>: the kernel evaluates both sides. No <code class="inline">decide</code>.</p>
+    </div>
+    <div class="board" data-scene="fools"></div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Sanity</p>
+  <h2>Special moves</h2>
+  <div class="cols-3">
+    <div><div class="board small" data-scene="castle"></div><p class="caption">Castling: legal, not through an attacked square, not after the king has moved and returned.</p></div>
+    <div><div class="board small" data-scene="ep"></div><p class="caption">En passant: only immediately after the double step; the captured pawn disappears.</p></div>
+    <div><div class="board small" data-scene="double"></div><p class="caption">Double check: only king moves are legal (exactly Kd8, Kf8, Kf7).</p></div>
+  </div>
+  <p class="small mt">Also promotion (exactly four choices), pins, kings not adjacent, no capture of a defended piece. 40 fixtures in all.</p>
+</section>
+
+<section>
+  <p class="kicker">Kernel</p>
+  <h2>Game states and the FIDE draw rules</h2>
+  <div class="cols wide-left">
+    <div>
+      <pre class="lean"><code data-decl="samePosition"></code></pre>
+      <pre class="lean"><code data-decl="GameState.automaticDraw"></code></pre>
+      <p class="small">Rule model A (chosen by the user): checkmate, stalemate, dead position, fivefold repetition, 75 moves.</p>
+    </div>
+    <div class="board small" style="width:380px" data-scene="fivefold"></div>
+  </div>
+</section>
+
+<!-- ================================ PART 2 ================================ -->
+<section class="divider" data-background-color="#0b1220">
+  <p class="kicker">Part 2</p>
+  <h1>Perfect play</h1>
+  <p class="sub">Chess is a finite game, so it has a value. What the value is remains unknown.</p>
+</section>
+
+<section>
+  <p class="kicker">Theory</p>
+  <h2>Zermelo, in general and for chess</h2>
+  <pre class="lean"><code data-decl="Game.exactly_one_outcome"></code></pre>
+  <pre class="lean"><code data-decl="chess_determined_initial"></code></pre>
+  <p class="small">The abstract part: backward induction on a game with a depth bound, one optimal positional strategy for both players. States carry the history, so this covers every strategy.</p>
+</section>
+
+<section>
+  <p class="kicker">Theory</p>
+  <h2>Why chess is finite: fivefold repetition</h2>
+  <div class="cols wide-left">
+    <div>
+      <pre class="lean"><code data-decl="history_length_le"></code></pre>
+      <p class="small">Positions are compared by a <b>key</b>: side to move, board, castling rights, set of legal moves. Keys form a finite type, and in a game that has not ended no key occurs five times, so the history is bounded.</p>
+    </div>
+    <div class="callout accent">The 75-move rule is not needed. The bound is astronomically large, and it does not matter: only finiteness is used.</div>
+  </div>
+</section>
+
+<!-- ================================ PART 3 ================================ -->
+<section class="divider" data-background-color="#0b1220">
+  <p class="kicker">Part 3</p>
+  <h1>King and queen against king</h1>
+  <p class="sub">An untrusted retrograde analysis proposes a move for every position; the Lean kernel checks all of them.</p>
+</section>
+
+<section>
+  <p class="kicker">Kernel</p>
+  <h2>Forced mate as an AND&ndash;OR tree</h2>
+  <div class="cols wide-left">
+    <div>
+      <pre class="lean"><code data-decl="ForcesMate"></code></pre>
+      <pre class="lean"><code data-decl="forcesMateB_sound"></code></pre>
+    </div>
+    <div>
+      <div class="board small" style="width:360px" data-scene="stalemate"></div>
+      <p class="caption">The stalemate trap: Qf7?? takes every square without check. The user&rsquo;s &ldquo;guard against stalemates&rdquo;: here Qg7 mates instead.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Untrusted oracle</p>
+  <h2>Retrograde analysis: 144,508 positions, depth at most 10</h2>
+  <div class="cols wide-left">
+    <div>
+      <div class="bars" id="bars"></div>
+      <div class="bars-x"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
+      <p class="caption">Positions with White to move by depth to mate (moves of White). Only Ka1, Qb2 v Kf5 and its symmetric copies need ten.</p>
+    </div>
+    <div>
+      <ul class="small">
+        <li>Python, about 15 seconds; an independently written validator agrees on every entry.</li>
+        <li>Black to move: 22,176 positions where the queen hangs (draw), 872 stalemates.</li>
+        <li>These are <b>observations</b>. They become theorems only through the kernel check.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Certificate</p>
+  <h2>One Boolean check per entry, proved sound once</h2>
+  <div class="cols">
+    <pre class="lean"><code data-decl="stateOK"></code></pre>
+    <pre class="lean"><code data-decl="table_sound"></code></pre>
+  </div>
+  <div class="flow mt">
+    <div class="box plasma">Oracle table<small>depth + White move, 16 bits</small></div><div class="arrow">&rarr;</div>
+    <div class="box">White move legal<small>no capture, own king safe</small></div><div class="arrow">&rarr;</div>
+    <div class="box">Black mated, or every reply<small>lands on a smaller depth</small></div><div class="arrow">&rarr;</div>
+    <div class="box good">ForcesMate by induction</div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Certificate</p>
+  <h2>Symbolic lemmas keep the kernel on three-piece boards</h2>
+  <pre class="lean big"><code data-decl="play_kqk_black"></code></pre>
+  <p class="small">The general <code class="inline">play</code> builds a new board as a closure; proving what it is, once, means the checker never evaluates closures, and legal moves do not depend on the halfmove clock (by <code class="inline">rfl</code>).</p>
+</section>
+
+<section>
+  <p class="kicker">Scale</p>
+  <h2>4,096 kernel checks</h2>
+  <div class="cols wide-left">
+    <div>
+      <pre class="lean big"><code data-decl="kqk_row_0_9"></code></pre>
+      <ul class="small">
+        <li>One declaration per (white king, queen) square pair; 64 files, 64 rows each.</li>
+        <li>About 8 minutes per file, five in parallel: roughly 8.5 hours of kernel time.</li>
+      </ul>
+    </div>
+    <div class="callout"><b>What went wrong.</b> A first version checked 4,096 entries per declaration: one Lean process grew to 11 GB and RAM filled up. The kernel&rsquo;s caches are per declaration, so splitting the check fixed it. Each build ran under a memory cap; <code class="inline">ulimit -v</code> turned out to break Lean, a cgroup cap did not.</div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Goal G-2</p>
+  <h2>The theorem</h2>
+  <div class="cols wide-left">
+    <div>
+      <pre class="lean"><code data-decl="kqk_forcesMate_wellFormed"></code></pre>
+      <p class="small">Axioms: <code class="inline">propext</code>, <code class="inline">Classical.choice</code>, <code class="inline">Quot.sound</code>.</p>
+      <p class="small">Play Black: click the black king, then a square. White answers from the certified table.</p>
+    </div>
+    <div class="board" style="width:500px" data-scene="kqk"></div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">The full game</p>
+  <h2>No repetition, no 75-move draw</h2>
+  <pre class="lean"><code data-decl="kqk_game_whiteWins_wellFormed"></code></pre>
+  <div class="cols mt">
+    <pre class="lean"><code data-decl="KQKNode.rank_eq_of_same"></code></pre>
+    <p class="small">A <b>rank</b> (twice the table depth with White to move, twice the largest reply depth plus one with Black to move) strictly decreases at every ply. Same position means same squares, hence same rank: nothing repeats. The rank is at most 20, so a clock of at most 130 never reaches 150.</p>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Black to move</p>
+  <h2>Four cases</h2>
+  <pre class="lean"><code data-decl="kqk_black_to_move"></code></pre>
+  <div class="cols-4 mt">
+    <div><div class="board small" style="width:250px" data-scene="bMated"></div><p class="caption">Checkmated.</p></div>
+    <div><div class="board small" style="width:250px" data-scene="bStale"></div><p class="caption">Stalemated.</p></div>
+    <div><div class="board small" style="width:250px" data-scene="bCapture"></div><p class="caption">Kxe7: the queen hangs; K v K is dead.</p></div>
+    <div><div class="board small" style="width:250px" data-scene="bForced"></div><p class="caption">Otherwise: mate within 10.</p></div>
+  </div>
+</section>
+
+<!-- ================================ PART 4 ================================ -->
+<section class="divider" data-background-color="#0b1220">
+  <p class="kicker">Part 4</p>
+  <h1>Dead positions</h1>
+  <p class="sub">FIDE 5.2.2: no sequence of legal moves leads to checkmate. A semantic definition, proved by invariants.</p>
+</section>
+
+<section>
+  <p class="kicker">Theory</p>
+  <h2>Insufficient material</h2>
+  <div class="cols wide-left">
+    <div>
+      <pre class="lean"><code data-decl="dead_KK"></code></pre>
+      <pre class="lean"><code data-decl="dead_KNK"></code></pre>
+      <pre class="lean"><code data-decl="dead_KBK"></code></pre>
+      <p class="small">An invariant closed under legal moves that excludes checkmate. A king checked by a lone knight or bishop always has a flight square of the other colour, and the enemy king cannot cover it. Guard in the other direction: <code class="inline">initial_not_dead</code>.</p>
+    </div>
+    <div><div class="board small" style="width:380px" data-scene="deadKBK"></div><p class="caption">Black is in check from the bishop, yet the position is dead.</p></div>
+  </div>
+</section>
+
+<!-- ================================ CLOSING ================================ -->
+<section>
+  <p class="kicker">How it was made</p>
+  <h2>One coordinator, several agents, one validity gate</h2>
+  <div class="cols-3">
+    <div class="card"><h3>Coordinator</h3><p>Startup audit, research graph, rules kernel, game states, KQK checker and soundness, the full-game argument; integration and audits of all agent work.</p></div>
+    <div class="card"><h3>Agents</h3><p>Determinacy (abstract and chess), the oracle and its validator, special-move fixtures, dead positions (K, KN, KB), the Black-to-move case.</p></div>
+    <div class="card plasma"><h3>Caught along the way</h3><p>A name clash between two agents&rsquo; files; an 11 GB kernel declaration; a memory cap that silently stopped Lean; a test that checked nothing.</p></div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">In numbers</p>
+  <h2>Chess in Lean</h2>
+  <div class="cols-3">
+    <div class="card"><div class="big">5,175</div><p>hand-written lines of Lean</p></div>
+    <div class="card"><div class="big">272</div><p>hand-written theorems</p></div>
+    <div class="card"><div class="big">4,096</div><p>certificate declarations, all checked</p></div>
+    <div class="card"><div class="big">144,508</div><p>White-to-move KQK positions, all wins</p></div>
+    <div class="card"><div class="big">11,891</div><p>declarations in the library axiom audit</p></div>
+    <div class="card"><div class="big">0</div><p><code class="inline">sorry</code>, <code class="inline">decide</code>, project axioms</p></div>
+  </div>
+</section>
+
+<section>
+  <p class="kicker">Next</p>
+  <h2>What remains</h2>
+  <div class="cols">
+    <ul class="small">
+      <li><b>The value of chess</b> (G-3b): open, and far beyond reach.</li>
+      <li>King and rook against king, with faster move generation or symmetry.</li>
+      <li>Replaying recorded games (Kasparov&rsquo;s) as rule fixtures.</li>
+      <li>Exactness of depth 10; castling flags without rooks.</li>
+    </ul>
+    <div class="card">
+      <h3>Links</h3>
+      <p><a href="index.html">Project page</a></p>
+      <p><a href="https://github.com/siddhartha-gadgil/Chess">Repository</a></p>
+      <p><a href="https://siddhartha-gadgil.github.io/LeanTheory/">LeanTheory</a></p>
+    </div>
+  </div>
+</section>
+
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
+<script src="kqk-table.js"></script>
+<script src="chess-board.js"></script>
+<script src="chess-scenes.js"></script>
+<script>
+(function () {
+  "use strict";
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  function highlight(code) {
+    return code.split(/(\/--[\s\S]*?-\/)/).map((p, i) => i % 2 ? '<span class="tok-com">' + esc(p) + "</span>"
+      : esc(p).replace(/\b(theorem|def|inductive|structure|where|fun|match|with|if|then|else|let|by)\b/g,
+          '<span class="tok-kw">$1</span>')
+        .replace(/\b(Position|Square|Move|Color|Board|Nat|Bool|Prop|State|Outcome|IsDead|ForcesMate)\b/g,
+          '<span class="tok-ty">$1</span>')).join("");
+  }
+  document.querySelectorAll("code[data-decl]").forEach((c) => {
+    const d = window.CHESS_DECLS[c.dataset.decl];
+    c.innerHTML = d ? highlight(d.code) : "missing " + esc(c.dataset.decl);
+  });
+
+  /* depth distribution (oracle, N-06) */
+  const counts = [2448, 5012, 9064, 19964, 26164, 32064, 32104, 15000, 2680, 8];
+  const bars = document.getElementById("bars"), mx = Math.max(...counts);
+  counts.forEach((n) => {
+    const d = document.createElement("div"); d.style.height = (100 * n / mx) + "%";
+    const s = document.createElement("span"); s.textContent = n.toLocaleString("en"); d.appendChild(s);
+    bars.appendChild(d);
+  });
+
+  /* scenes */
+  const SC = {};
+  window.CHESS_SCENES.forEach((s) => { SC[s.id] = s.board; });
+  SC.titleBg = { mode: "kqk", kqk: { wk: "a1", wq: "b2", bk: "f5" }, controls: false, autoplay: true, loop: true, speed: 1000 };
+  SC.kqk = { mode: "kqk", kqk: { wk: "a1", wq: "b2", bk: "f5" } };
+  SC.bMated = { fen: "7k/6Q1/6K1/8/8/8/8/8", turn: "b", moves: [], controls: false };
+  SC.bStale = { fen: "k7/2Q5/1K6/8/8/8/8/8", turn: "b", moves: [], controls: false };
+  SC.bCapture = { fen: "4k3/4Q3/8/8/8/8/8/4K3", turn: "b", moves: ["e8e7"], controls: false, autoplay: true, loop: true, speed: 1400 };
+  SC.bForced = { mode: "kqk", kqk: { wk: "e1", wq: "a1", bk: "e8", turn: "b" }, controls: false, autoplay: true, loop: true, speed: 900 };
+  ["fools", "castle", "ep", "double", "fivefold", "stalemate"].forEach((k) => { if (SC[k]) SC[k] = Object.assign({}, SC[k], { autoplay: true, loop: true }); });
+
+  const boards = new Map();
+  let current = [];
+  function activate(slide) {
+    for (const b of current) b.setActive(false);
+    current = [];
+    if (!slide) return;
+    slide.querySelectorAll("[data-scene]").forEach((div) => {
+      const sc = SC[div.dataset.scene];
+      if (!sc) { div.textContent = "missing scene " + div.dataset.scene; return; }
+      if (!boards.has(div)) boards.set(div, ChessBoard(div, sc));
+      const b = boards.get(div);
+      b.setActive(true);
+      current.push(b);
+    });
+  }
+
+  Reveal.initialize({
+    hash: true,
+    slideNumber: "c/t",
+    width: 1600,
+    height: 900,
+    margin: 0.04,
+    maxScale: 1.0,
+    center: false,
+    transition: "slide",
+    backgroundTransition: "fade",
+    plugins: [RevealNotes]
+  });
+  Reveal.on("ready", (e) => activate(e.currentSlide));
+  Reveal.on("slidechanged", (e) => activate(e.currentSlide));
+})();
+</script>
+</body>
+</html>
