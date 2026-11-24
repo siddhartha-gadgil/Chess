@@ -12,7 +12,7 @@
 | Dependency requirement | `N-02`/`N-03` compiled: `legalMoves`, `IsCheckmate`, `ForcesMate`; `N-06` supplies untrusted data only |
 | Produces | Theorem `kqk_forcesMate` (planned): for every KQK state `s` with White to move, Black not in check, kings not adjacent, `ForcesMate White N s` for an explicit `N` (target `N = 10`); a Black-to-move corollary |
 | Difficulty | moderate–hard: about 28 000–40 000 relevant positions (`S-6`, order of magnitude only); a pure hand proof has many cases |
-| Status | **verified** (White to move; see scope) |
+| Status | **verified** (White to move, Black to move, full game from a fresh start) |
 | Implementation status | complete (White to move); Black-to-move case split and game-state transfer not started |
 | Implementation evidence | `LeanTheory/Certificates/Chess/{KQKCheck,KQKData,KQKBridge,KQK}.lean`, `KQKChunks/C00…C63.lean`; generator `notes/reasoning/2026-11-20-kqk-oracle/computations/gen_lean_cert.py` |
 | Lean evidence | `LeanTheory.Chess.kqk_forcesMate`, `LeanTheory.Chess.kqk_forcesMate_wellFormed` (axioms: `propext`, `Classical.choice`, `Quot.sound`); supporting `table_sound`, `kqk_forcesMate_of_table`, `kqk_forcesMate_of_table_wellFormed`, `play_kqk_king/queen/black`, `ForcesMate.halfmove`, `kqkTable_ok`, `chunkOK_all`, `kqk_row_<wk>_<wq>` (4096 kernel checks) |
@@ -84,8 +84,12 @@ lemmas for the effect of king and queen moves on KQK boards.
 
 Scope and limits:
 
-- White to move only. The Black-to-move case split (mate unless Black can capture an undefended
-  queen or is stalemated) is not yet a theorem.
+- **Black to move — proved** (`Certificates/Chess/KQKBlack.lean`, sub-agent): `kqk_black_to_move`:
+  in every well-formed KQK position with Black to move (no castling rights), Black is checkmated,
+  or stalemated, or has a legal capture of the queen leading to a dead position, or else White
+  forces mate within 10 moves. Fixtures for each case (`kqkBlackMated_checkmate`,
+  `kqkBlackStalemate_stalemate`, `kqkBlackCapture_dead`, `kqkBlackForced_forcesMate`) and a
+  rejected adjacent-kings position.
 - **Full game with draw rules — proved** (`Certificates/Chess/KQKGame.lean`):
   `kqk_game_whiteWins_wellFormed`: from the start of a game (`State.start p`) in a well-formed KQK
   position with White to move, no castling rights and halfmove clock ≤ 130, White forces a win in
