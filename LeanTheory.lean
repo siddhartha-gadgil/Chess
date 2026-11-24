@@ -9,6 +9,9 @@ public import LeanTheory.Bridge.Example
 public import LeanTheory.Certificates.BlockBounds
 public import LeanTheory.Certificates.BoolCert
 public import LeanTheory.Certificates.Contraction
+public import LeanTheory.Certificates.Chess.KQKBridge
+public import LeanTheory.Certificates.Chess.KQKCheck
+public import LeanTheory.Certificates.Chess.KQKData
 public import LeanTheory.Certificates.ConvAlgebra
 public import LeanTheory.Certificates.DigitSumCert
 public import LeanTheory.Certificates.DiscreteMaxPrinciple
@@ -59,6 +62,7 @@ public import LeanTheory.Sanity.Example
 public import LeanTheory.Sanity.QuasisymmetryNotSymmetry
 public import LeanTheory.SubsetSum
 public import LeanTheory.TaskHandlers
+public import LeanTheory.Theory.Chess.Determinacy
 public import LeanTheory.Theory.Fields.FieldLineExistence
 public import LeanTheory.Theory.Fields.InvariantBarrier
 public import LeanTheory.Theory.Fields.LieGradient

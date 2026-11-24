@@ -99,11 +99,14 @@ def sq (f r : Nat) : Square := ⟨((r - 1) % 8) * 8 + f % 8, by omega⟩
 /-- The square with index `n`, if `n < 64`. -/
 def Square.ofNat? (n : Nat) : Option Square := if h : n < 64 then some ⟨n, h⟩ else none
 
-/-- The square displaced by `df` files and `dr` ranks, if it lies on the board. -/
+/-- The square displaced by `df` files and `dr` ranks, if it lies on the board. (Coordinates are
+offset by 8 so that the bounds checks are comparisons of natural numbers, which the Lean kernel
+evaluates much faster than integer comparisons; displacements satisfy `|df|, |dr| ≤ 8` in all
+uses, and larger negative ones give `none`.) -/
 def Square.shift (s : Square) (df dr : Int) : Option Square :=
-  let f : Int := (s.file : Int) + df
-  let r : Int := (s.rank : Int) + dr
-  if 0 ≤ f ∧ f < 8 ∧ 0 ≤ r ∧ r < 8 then Square.ofNat? (r * 8 + f).toNat else none
+  let f : Nat := ((s.file + 8 : Nat) + df).toNat
+  let r : Nat := ((s.rank + 8 : Nat) + dr).toNat
+  if 8 ≤ f ∧ f < 16 ∧ 8 ≤ r ∧ r < 16 then Square.ofNat? ((r - 8) * 8 + (f - 8)) else none
 
 /-- All 64 squares, in index order. -/
 def allSquares : List Square := (List.range 64).filterMap Square.ofNat?

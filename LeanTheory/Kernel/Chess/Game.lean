@@ -37,6 +37,13 @@ The game-theoretic model with draw rules (`ForcesMate` lifted to game states, th
 
 namespace LeanTheory.Chess
 
+/-! ### Squares -/
+
+/-- Every square is in `allSquares`. -/
+theorem mem_allSquares (s : Square) : s ∈ allSquares := by
+  simp only [allSquares, List.mem_filterMap, List.mem_range]
+  exact ⟨s.val, s.isLt, by simp [Square.ofNat?]⟩
+
 /-! ### Well-formed positions -/
 
 /-- The number of squares holding the piece `pc`. -/
