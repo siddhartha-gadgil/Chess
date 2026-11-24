@@ -61,7 +61,7 @@ Questions may be primary research outputs or auxiliary prerequisites.
 | `N-04` | `chess/N-04-determinacy.md` — Zermelo determinacy | `G-3`, `Q-5a` | abstract: none; chess: `N-03` (compiled) | routine–moderate | **verified** (abstract + chess instance) | Done; `G-3(a)` achieved |
 | `N-05` | `chess/N-05-kqk-strategy.md` — KQK forced mate | `G-2`, `Q-4`, `Q-8` | `N-02` ✓, `N-03` ✓ (compiled); `N-06` ✓ (data only) | moderate–hard | stated / **lean-ready** | Certificate checker + soundness; measure kernel cost on one king square |
 | `N-06` | `chess/N-06-kqk-retrograde-oracle.md` — KQK oracle | `Q-4`, `Q-8` | `N-01` | routine | **complete** (observation): all WTM wins, max DTM 10 | Feed certificate to `N-05` |
-| `N-07` | `chess/N-07-dead-positions.md` — dead positions | `G-1`, `G-4`, `Q-6` | `N-02` ✓, `N-03` ✓ | moderate | stated / **lean-ready** | Prove `dead_KK` etc. by an invariant |
+| `N-07` | `chess/N-07-dead-positions.md` — dead positions | `G-1`, `G-4`, `Q-6` | `N-02` ✓, `N-03` ✓ | moderate | **verified** KvK, KNvK; KBvK open | KBvK via colour invariant |
 | `N-08` | `chess/N-08-value-of-chess.md` — value of chess: status | `G-3`, `Q-5`, `Q-9` | `N-04` | research | exploratory / not Lean | Keep as guard against overclaiming |
 | `N-09` | `chess/N-09-game-fixtures.md` — recorded games as fixtures | `G-1`, `Q-7` | `N-02` (compiled), `Q-7` | routine–moderate | stated / blocked | Choose source |
 

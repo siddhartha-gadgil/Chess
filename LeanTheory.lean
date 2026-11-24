@@ -62,6 +62,7 @@ public import LeanTheory.Sanity.Example
 public import LeanTheory.Sanity.QuasisymmetryNotSymmetry
 public import LeanTheory.SubsetSum
 public import LeanTheory.TaskHandlers
+public import LeanTheory.Theory.Chess.DeadPositions
 public import LeanTheory.Theory.Chess.Determinacy
 public import LeanTheory.Theory.Fields.FieldLineExistence
 public import LeanTheory.Theory.Fields.InvariantBarrier
