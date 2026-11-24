@@ -57,6 +57,7 @@ public import LeanTheory.Kernel.Chess.Game
 public import LeanTheory.Kernel.Chess.Rules
 public import LeanTheory.Kernel.Example
 public import LeanTheory.ResponseExt
+public import LeanTheory.Sanity.Chess.Dead
 public import LeanTheory.Sanity.Chess.Game
 public import LeanTheory.Sanity.Chess.Rules
 public import LeanTheory.Sanity.Chess.SpecialMoves
